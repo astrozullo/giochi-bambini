@@ -1,5 +1,7 @@
 # 🧠 Giochi Bimbi — Memory a Livelli
 
+*App gratuita di giochi educativi per bambini (3-8 anni) per Android, iPhone e web: memory, labirinto, abbinamenti, disegno, ricalco lettere, conta e gara di kart. Offline, senza pubblicità, senza account, open source (MIT).*
+
 ## ⬇️ SCARICA QUI IL GIOCO
 
 > ### 📱 [GIOCA SUBITO → astrozullo.github.io/giochi-bambini](https://astrozullo.github.io/giochi-bambini/)
@@ -120,3 +122,7 @@ giochi-bimbi/
 ## 📄 Licenza
 
 Codice: [MIT](LICENSE). Font Fredoka: © 2016 The Fredoka Project Authors, [SIL OFL 1.1](https://scripts.sil.org/OFL).
+
+## 🇬🇧 English
+
+**Giochi Bimbi** is a free, open-source collection of nine educational mini-games for children aged 3-8: memory, maze, matching, stamps/drawing, letter tracing, counting and a kart race. Italian and English interface (auto-detected from the device), parents area with a daily play-time limit, no ads, no data collection, works fully offline. Install it as a PWA from [the website](https://astrozullo.github.io/giochi-bambini/) or sideload the signed Android APK from this repo. MIT licensed.
