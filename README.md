@@ -9,7 +9,7 @@
 > Android chiederà conferma perché l'app non viene dallo store: è normale, tocca "Installa comunque".
 
 
-**v0.8.3** · App di giochi educativi per bambini da 3 a 8 anni. HTML autonomo, zero dipendenze esterne, zero connessione richiesta: font incluso, nessun tracker, nessuna pubblicità. Interfaccia in italiano o inglese (automatica dal dispositivo) e limite di tempo giornaliero impostabile dai genitori.
+**v0.8.4** · App di giochi educativi per bambini da 3 a 8 anni. HTML autonomo, zero dipendenze esterne, zero connessione richiesta: font incluso, nessun tracker, nessuna pubblicità. Interfaccia in italiano o inglese (automatica dal dispositivo) e limite di tempo giornaliero impostabile dai genitori.
 
 Installabile su **Android** (e iOS) come app a schermo intero, funziona **completamente offline**.
 
@@ -47,8 +47,9 @@ Perché i telefoni accettino il nuovo APK **sopra** quello installato (senza dis
 Checklist completa di una release:
 1. modifica `index.html` / `bolidi.html`
 2. `sw.js`: incrementa `CACHE_NAME` (aggiorna la PWA sui dispositivi)
-3. `wrapper/build.sh <nuovaVersione> <versionCode+1>` (aggiorna l'APK)
-4. sostituisci `giochi-bimbi.apk` nella radice del repo, commit e push
+3. aggiorna `version.json` (versionName e versionCode): è quello che il pulsante "Verifica aggiornamenti" in app confronta
+4. `wrapper/build.sh <nuovaVersione> <versionCode+1>` (aggiorna l'APK)
+5. sostituisci `giochi-bimbi.apk` nella radice del repo, commit e push
 
 La PWA installata si aggiorna da sola al primo avvio con rete; l'APK va riscaricato e installato sopra (Android chiede conferma ma mantiene dati e salvataggi).
 

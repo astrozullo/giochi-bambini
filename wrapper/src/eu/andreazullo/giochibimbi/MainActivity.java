@@ -102,8 +102,29 @@ public class MainActivity extends Activity {
         }
     }
 
-    /* ---------- Ponte nativo: orientamento per pagina ---------- */
+    /* ---------- Ponte nativo: orientamento per pagina, link esterni ---------- */
     public class AppNative {
+
+        /** Apre un https:// nel browser esterno (l'app resta senza permesso INTERNET). */
+        @JavascriptInterface
+        public void openUrl(final String url) {
+            if (url == null || !url.startsWith("https://")) return;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        android.content.Intent i = new android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(url));
+                        i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                    } catch (Exception e) {
+                        // nessun browser disponibile: non succede nulla
+                    }
+                }
+            });
+        }
+
         @JavascriptInterface
         public void setOrientation(final String mode) {
             runOnUiThread(new Runnable() {

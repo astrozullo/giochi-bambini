@@ -2,8 +2,8 @@
 <!-- Nessuna permission: l'app è interamente offline per costruzione. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.andreazullo.giochibimbi"
-    android:versionCode="4"
-    android:versionName="0.8.3">
+    android:versionCode="5"
+    android:versionName="0.8.4">
 
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
 

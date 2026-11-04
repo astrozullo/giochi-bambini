@@ -4,7 +4,7 @@
  * e funziona per sempre offline. Cambiare CACHE_NAME a ogni release
  * per forzare l'aggiornamento.
  */
-const CACHE_NAME = 'giochi-bimbi-v0.8.3';
+const CACHE_NAME = 'giochi-bimbi-v0.8.4';
 
 const ASSETS = [
   './',

@@ -2336,6 +2336,16 @@ const GB_T = {
                 en:'Giochi Bimbi v{v} · free, no ads, no data collection.' },
   infoResp:   { it:"L'app è fornita così com'è: l'autore non si assume alcuna responsabilità per l'utilizzo dell'app né per le conseguenze che ne derivano.",
                 en:'This app is provided as is: the author takes no responsibility for its use or for any consequences arising from it.' },
+  updBtn:     { it:'🔄 Verifica aggiornamenti', en:'🔄 Check for updates' },
+  updWait:    { it:'Controllo…', en:'Checking…' },
+  updOk:      { it:'Sei già alla versione più recente (v{v}).', en:'You already have the latest version (v{v}).' },
+  updNew:     { it:"Nuova versione disponibile: v{v}. Chiudi e riapri l'app con Internet attiva: si aggiorna da sola.",
+                en:'New version available: v{v}. Close and reopen the app while online: it updates itself.' },
+  updErr:     { it:'Impossibile controllare: serve una connessione a Internet.',
+                en:'Could not check: an Internet connection is needed.' },
+  updApk:     { it:"Le novità e l'APK aggiornato sono sulla pagina GitHub del progetto.",
+                en:"News and the updated APK are on the project's GitHub page." },
+  updApkBtn:  { it:'Apri la pagina di download', en:'Open the download page' },
   infoAge:    { it:"L'uso è sconsigliato ai bambini sotto i 4 anni. Si consiglia l'uso con la supervisione di un adulto.",
                 en:'Use is not recommended for children under 4. Adult supervision is advised.' }
 };
@@ -2421,15 +2431,51 @@ function parSettings(){
 function parSetLang(v){ gbs.lang = v; gbSave(); applyLang(); parSettings(); }
 function parSetLimit(v){ gbs.limit = v; gbSave(); parSettings(); }
 function parResetToday(){ try { localStorage.removeItem(gbPlayKey()); } catch(e){} gbGrace = 0; parSettings(); }
-const GB_VERSION = '0.8.3';
+const GB_VERSION = '0.8.4';
+const GB_VERSION_CODE = 5;
+const GB_REPO_URL = 'https://github.com/astrozullo/giochi-bambini';
+const GB_VERSION_URL = 'https://raw.githubusercontent.com/astrozullo/giochi-bambini/main/version.json';
 function infoOpen(){
   document.getElementById('infoCard').innerHTML =
     '<h2>' + GB.t('infoTitle') + '</h2>' +
     '<div class="par-info">' + GB.t('infoVer').replace('{v}', GB_VERSION) + '</div>' +
     '<p class="par-text">' + GB.t('infoResp') + '</p>' +
     '<p class="par-text">' + GB.t('infoAge') + '</p>' +
+    '<div id="updArea"></div>' +
     '<button class="par-close" onclick="infoClose()">' + GB.t('close') + '</button>';
+  updRender();
   document.getElementById('info').style.display = 'flex';
+}
+function updRender(){
+  const a = document.getElementById('updArea');
+  if (window.AppStore){           // app installata da APK: niente rete propria, si apre il browser
+    a.innerHTML = '<p class="par-text">' + GB.t('updApk') + '</p>' +
+      '<button class="par-opt" onclick="updOpenRepo()">' + GB.t('updApkBtn') + '</button>';
+  } else {
+    a.innerHTML = '<button class="par-opt" onclick="updCheck()">' + GB.t('updBtn') + '</button>' +
+      '<div class="par-info" id="updMsg"></div>';
+  }
+}
+function updOpenRepo(){
+  try { if (window.AppNative && AppNative.openUrl){ AppNative.openUrl(GB_REPO_URL); return; } } catch(e){}
+  // wrapper vecchio senza openUrl: mostra almeno l'indirizzo
+  document.getElementById('updArea').innerHTML += '<div class="par-info">github.com/astrozullo/giochi-bambini</div>';
+}
+function updCheck(){
+  const m = document.getElementById('updMsg');
+  m.textContent = GB.t('updWait');
+  fetch(GB_VERSION_URL, { cache:'no-store' })
+    .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+    .then(function(j){
+      if ((j.versionCode|0) > GB_VERSION_CODE){
+        m.textContent = GB.t('updNew').replace('{v}', j.versionName);
+        if (navigator.serviceWorker) navigator.serviceWorker.getRegistration()
+          .then(function(reg){ if (reg) reg.update(); }).catch(function(){});
+      } else {
+        m.textContent = GB.t('updOk').replace('{v}', GB_VERSION);
+      }
+    })
+    .catch(function(){ m.textContent = GB.t('updErr'); });
 }
 function infoClose(){ document.getElementById('info').style.display = 'none'; }
 function parClose(){

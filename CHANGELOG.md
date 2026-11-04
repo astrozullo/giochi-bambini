@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.4] — 2026-11-04
+
+### Aggiunto
+- Verifica aggiornamenti nella sezione Info: la PWA confronta la versione con `version.json` del repo (e forza l'update del service worker se c'è una versione nuova); l'app APK, che resta senza permesso Internet, apre la pagina GitHub nel browser esterno tramite il nuovo `AppNative.openUrl`
+- `version.json` nel repo come riferimento di versione (da aggiornare a ogni release, vedi checklist nel README)
+
 ## [0.8.3] — 2026-11-04
 
 ### Aggiunto
