@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1] — 2026-11-04
+
+### Modificato
+- `wrapper/build.sh` prende versione come argomenti (`./build.sh <versionName> <versionCode>`) e aggiorna il manifest da solo; si rifiuta di creare un keystore nuovo se manca quello originale (proteggendo gli aggiornamenti)
+- README: checklist di release e regole per gli aggiornamenti APK (versionCode crescente, stessa firma)
+- APK ricompilato come versionCode 2 (contenuto identico alla 0.8.0): installandolo sopra la 0.8.0 verifica il percorso di aggiornamento senza perdita dei salvataggi
+
 ## [0.8.0] — 2026-11-04
 
 ### Aggiunto

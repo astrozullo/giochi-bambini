@@ -26,7 +26,22 @@ L'APK pronto è nel repo: [`giochi-bimbi.apk`](giochi-bimbi.apk) (165 KB, firmat
 
 In `wrapper/` c'è un involucro Android nativo: installando l'APK, al primo avvio si crea la cartella privata dell'app `files/salvataggi/` con **un file JSON per salvataggio** (impostazioni genitori, minuti giocati, progressi di Bolidi). L'HTML è lo stesso della PWA: un piccolo ponte (`window.AppStore`) reindirizza i salvataggi sui file; nel browser non cambia nulla.
 
-Build (Linux, senza Android Studio): `wrapper/build.sh` — richiede `aapt zipalign apksigner android-sdk-platform-23 openjdk-21-jdk-headless` e `dx.jar` compilato da [aosp-mirror/platform_dalvik](https://github.com/aosp-mirror/platform_dalvik). Il keystore generato al primo giro va conservato (stessa firma per gli aggiornamenti) e **non** va committato.
+Build (Linux, senza Android Studio): `wrapper/build.sh <versionName> <versionCode>` — richiede `aapt zipalign apksigner android-sdk-platform-23 openjdk-21-jdk-headless` e `dx.jar` compilato da [aosp-mirror/platform_dalvik](https://github.com/aosp-mirror/platform_dalvik).
+
+### Pubblicare un aggiornamento
+
+Perché i telefoni accettino il nuovo APK **sopra** quello installato (senza disinstallare, quindi senza perdere i salvataggi) servono due cose, e lo script le impone:
+
+1. **`versionCode` sempre crescente**: ogni release passa il numero successivo. Es.: `./build.sh 0.9.0 2`, poi `./build.sh 1.0.0 3`, ecc. Android rifiuta un APK con `versionCode` uguale o più basso di quello installato.
+2. **Stessa firma**: la build usa il keystore originale `giochibimbi.keystore` (da tenere privato, MAI nel repo: il `.gitignore` lo esclude). Se manca, lo script si ferma con un errore invece di generarne uno nuovo di nascosto: un APK firmato con chiave diversa non si installa come aggiornamento. Solo per la primissima build si può creare la chiave con `CREA_NUOVA_CHIAVE=1 ./build.sh 0.8.0 1`.
+
+Checklist completa di una release:
+1. modifica `index.html` / `bolidi.html`
+2. `sw.js`: incrementa `CACHE_NAME` (aggiorna la PWA sui dispositivi)
+3. `wrapper/build.sh <nuovaVersione> <versionCode+1>` (aggiorna l'APK)
+4. sostituisci `giochi-bimbi.apk` nella radice del repo, commit e push
+
+La PWA installata si aggiorna da sola al primo avvio con rete; l'APK va riscaricato e installato sopra (Android chiede conferma ma mantiene dati e salvataggi).
 
 ## 🔒 Area genitori
 
