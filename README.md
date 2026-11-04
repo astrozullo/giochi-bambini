@@ -1,5 +1,14 @@
 # 🧠 Giochi Bimbi — Memory a Livelli
 
+## ⬇️ SCARICA QUI IL GIOCO
+
+> ### 📱 [GIOCA SUBITO → astrozullo.github.io/giochi-bambini](https://astrozullo.github.io/giochi-bambini/)
+> Apri il link dal telefono (Android o iPhone), poi **menu ⋮ → "Aggiungi a schermata Home" / "Installa app"**: l'icona appare in Home e il gioco funziona anche senza Internet. Gratis, senza pubblicità, senza raccolta di dati.
+>
+> ### 🤖 In alternativa, per Android: [scarica l'APK](https://github.com/astrozullo/giochi-bambini/raw/main/giochi-bimbi.apk)
+> Android chiederà conferma perché l'app non viene dallo store: è normale, tocca "Installa comunque".
+
+
 **v0.8.3** · App di giochi educativi per bambini da 3 a 8 anni. HTML autonomo, zero dipendenze esterne, zero connessione richiesta: font incluso, nessun tracker, nessuna pubblicità. Interfaccia in italiano o inglese (automatica dal dispositivo) e limite di tempo giornaliero impostabile dai genitori.
 
 Installabile su **Android** (e iOS) come app a schermo intero, funziona **completamente offline**.
