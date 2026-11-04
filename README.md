@@ -1,6 +1,6 @@
 # 🧠 Giochi Bimbi — Memory a Livelli
 
-**v0.8.2** · App di giochi educativi per bambini da 3 a 8 anni. HTML autonomo, zero dipendenze esterne, zero connessione richiesta: font incluso, nessun tracker, nessuna pubblicità. Interfaccia in italiano o inglese (automatica dal dispositivo) e limite di tempo giornaliero impostabile dai genitori.
+**v0.8.3** · App di giochi educativi per bambini da 3 a 8 anni. HTML autonomo, zero dipendenze esterne, zero connessione richiesta: font incluso, nessun tracker, nessuna pubblicità. Interfaccia in italiano o inglese (automatica dal dispositivo) e limite di tempo giornaliero impostabile dai genitori.
 
 Installabile su **Android** (e iOS) come app a schermo intero, funziona **completamente offline**.
 

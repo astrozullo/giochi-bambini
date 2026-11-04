@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.3] — 2026-11-04
+
+### Aggiunto
+- Sezione "❔ Info" nel menu (bilingue): nota di esclusione di responsabilità dell'autore e uso sconsigliato sotto i 4 anni, con consiglio di supervisione di un adulto; mostra anche la versione dell'app
+
 ## [0.8.2] — 2026-11-04
 
 ### Modificato
