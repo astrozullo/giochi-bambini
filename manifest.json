@@ -1,7 +1,7 @@
 {
   "name": "Giochi Bimbi — Memory a Livelli",
   "short_name": "Giochi Bimbi",
-  "description": "Nove giochi educativi per bambini 1-6+ anni: Tocca, Abbinamenti, Memory, Labirinto, Stampini, Ricalca, Conta, Piccoli Bolidi. Funziona completamente offline.",
+  "description": "Nove giochi educativi per bambini da 3 a 8 anni: Tocca, Abbinamenti, Memory, Labirinto, Stampini, Ricalca, Conta, Piccoli Bolidi. Funziona completamente offline.",
   "lang": "it",
   "start_url": "./index.html",
   "scope": "./",

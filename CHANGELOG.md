@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2] — 2026-11-04
+
+### Modificato
+- Fascia d'età dichiarata: da 3 a 8 anni (prima "da 1"); etichetta di Tocca! da "1/3 anni" a "3+ anni" (IT e EN), manifest e README aggiornati
+- Cache PWA `v0.8.2`; APK versionCode 3
+
 ## [0.8.1] — 2026-11-04
 
 ### Modificato
