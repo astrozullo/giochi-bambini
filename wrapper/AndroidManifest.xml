@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nessuna permission: l'app è interamente offline per costruzione. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="eu.andreazullo.giochibimbi"
+    android:versionCode="1"
+    android:versionName="0.8.0">
+
+    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
+
+    <application
+        android:label="Giochi Bimbi"
+        android:icon="@drawable/icon"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

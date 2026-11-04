@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Memory a Livelli</title>
+<!-- PWA: installabile su Android/iOS, funziona offline (v0.8) -->
+<meta name="theme-color" content="#F8F2E7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Giochi Bimbi">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<!-- Font Fredoka incorporato nel file: nessuna richiesta a Internet, funziona anche offline.
+     Fredoka, Copyright 2016 The Fredoka Project Authors, SIL Open Font License 1.1 -->
+<script>
+/* Ponte salvataggi APK: nel wrapper Android (window.AppStore) i dati vivono come
+   file JSON nella cartella privata dell'app; nel browser questo blocco non fa
+   nulla e resta il normale localStorage. Deve stare PRIMA di ogni altro script. */
+(function(){
+  var B = window.AppStore;
+  if (!B || !B.get || !B.set) return;
+  try {                                   /* idrata localStorage dai file */
+    var ks = JSON.parse(B.keys() || '[]');
+    for (var i = 0; i < ks.length; i++){
+      var v = B.get(ks[i]);
+      if (v !== null && v !== undefined) try { localStorage.setItem(ks[i], v); } catch(e){}
+    }
+  } catch(e){}
+  try {                                   /* specchia le scritture sui file */
+    var S = Storage.prototype, s0 = S.setItem, r0 = S.removeItem;
+    S.setItem = function(k, v){ s0.apply(this, arguments);
+      if (this === window.localStorage) try { B.set(String(k), String(v)); } catch(e){} };
+    S.removeItem = function(k){ r0.apply(this, arguments);
+      if (this === window.localStorage) try { B.remove(String(k)); } catch(e){} };
+  } catch(e){}
+})();
+</script>
+<style>
+@font-face{
+  font-family:'Fredoka';
+  font-style:normal;
+  font-weight:300 700;
+  font-display:swap;
+  src:url(data:font/woff2;base64,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) format('woff2');
+}
+</style>
+<style>
+  :root{
+    --bg1:#F8F2E7; --bg2:#ECE4D2;
+    --ink:#5E5142; --ink-soft:#9A8B78;
+    --back1:#B9CEA9; --back2:#9DBC8B;        /* dorso carta: verde salvia */
+    --front:#FFFDF8;                          /* fronte carta */
+    --match:#EBC978;                          /* bordo coppia trovata */
+    --coral:#E6A896; --coral-dk:#DA9480;      /* pulsante 3 anni */
+    --sage:#AECB9F; --sage-dk:#9ABB89;        /* pulsante 6 anni */
+    --lav:#CDBCD8; --lav-dk:#B9A6C9;          /* accento tenue (no blu forte) */
+    --honey:#E8C06A; --honey-dk:#D6AC4E;      /* quarto gioco: oro caldo */
+    --rose:#E7A6C0; --rose-dk:#D98FAD;        /* quinto gioco: rosa tenue */
+    --mint:#A9CFBE; --mint-dk:#92BCA9;        /* sesto gioco: verde acqua tenue */
+    --olive:#C6CE8C; --olive-dk:#B2BB74;      /* settimo gioco: verde oliva chiaro */
+    --shadow: 0 8px 22px rgba(120,100,70,.16);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+    -webkit-touch-callout:none;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Fredoka',ui-rounded,'SF Pro Rounded','Segoe UI Rounded',system-ui,-apple-system,'Segoe UI',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(120vw 80vw at 80% -10%, #F4E9D3 0%, transparent 55%),
+      radial-gradient(90vw 70vw at -10% 110%, #E7EEDD 0%, transparent 55%),
+      linear-gradient(160deg, var(--bg1), var(--bg2));
+    background-attachment:fixed;
+    min-height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding:18px;
+    overflow-x:hidden;
+  }
+  .wrap{width:100%; max-width:700px; text-align:center;}
+
+  /* ---------- Menu giochi ---------- */
+  #start, #traceStart{ display:none; }         /* schermate di scelta età, nascoste all'avvio */
+  .subbar{ display:flex; justify-content:flex-start; margin-bottom:12px; }
+  .games{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .game{
+    position:relative; border:none; cursor:pointer; color:#fff;
+    font-family:inherit; font-weight:600;
+    border-radius:22px; padding:16px 10px; width:min(28.5vw,148px);
+    box-shadow:var(--shadow); transition:transform .12s, filter .12s;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+  }
+  .game .big{ font-size:clamp(1.9rem,7.4vw,2.7rem); line-height:1; }
+  .game .gname{ font-size:clamp(.92rem,3.5vw,1.12rem); }
+  .game .gage{ font-size:.76rem; font-weight:500; opacity:.85; margin-top:-3px; }
+  #menu .emoji-row{ font-size:clamp(1.4rem,5.6vw,2.1rem); margin:.1em 0 .35em; letter-spacing:.08em; }
+  #menu h1{ font-size:clamp(1.7rem,6.4vw,2.6rem); }
+  #menu .sub{ margin-bottom:1em; font-size:clamp(.95rem,3.6vw,1.15rem); }
+  .game.g-memory{ background:linear-gradient(160deg,var(--sage),var(--sage-dk)); }
+  .game.g-maze{   background:linear-gradient(160deg,var(--coral),var(--coral-dk)); }
+  .game.g-seq{    background:linear-gradient(160deg,var(--lav),var(--lav-dk)); }
+  .game:hover{ transform:translateY(-3px); filter:brightness(1.03); }
+  .game:active{ transform:translateY(0) scale(.98); }
+  .game.soon{ opacity:.6; cursor:default; }         /* placeholder: non fa nulla */
+  .game.soon:hover{ transform:none; filter:none; }
+  .game.soon:active{ transform:none; }
+  .badge{
+    position:absolute; top:10px; right:10px;
+    background:rgba(255,255,255,.85); color:var(--ink);
+    font-size:.72rem; font-weight:700; letter-spacing:.5px;
+    padding:3px 9px; border-radius:999px; text-transform:uppercase;
+  }
+
+  /* ---------- Labirinto ---------- */
+  #maze{ display:none; }
+  #mazeCanvas{ display:block; border-radius:20px; box-shadow:var(--shadow); background:#FBF7EE; touch-action:none; }
+  .maze-hint{ color:var(--ink-soft); font-weight:500; font-size:.95rem; margin:14px auto 0; max-width:430px; line-height:1.4; }
+
+  /* ---------- Abbinamenti ---------- */
+  .game.g-abb{ background:linear-gradient(160deg,var(--honey),var(--honey-dk)); }
+  #abb{ display:none; }
+  #abbCanvas{ display:block; border-radius:20px; box-shadow:var(--shadow); background:#FBF7EE; touch-action:none; }
+
+  /* ---------- Stampini ---------- */
+  .game.g-stamp{ background:linear-gradient(160deg,var(--rose),var(--rose-dk)); }
+  #stamp{ display:none; }
+  #stampCanvas{ display:block; border-radius:20px; box-shadow:var(--shadow); background:#FFFDF8; touch-action:none; }
+  .stamp-tools{ display:flex; justify-content:space-between; align-items:center; width:min(94vw,560px); margin:14px auto 0; }
+  .stamp-tool{
+    border:none; cursor:pointer; background:#fff; border-radius:20px;
+    width:78px; height:78px; box-shadow:var(--shadow); font-size:2.5rem;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s, box-shadow .1s;
+  }
+  .stamp-tool:active{ transform:scale(.95); }
+  .stamp-tool.active{ box-shadow:0 0 0 4px rgba(216,174,80,.55), var(--shadow); }
+  #stampBtn{ width:clamp(100px,30vw,132px); height:clamp(100px,30vw,132px); font-size:clamp(3rem,11vw,4.2rem); border-radius:24px; }
+
+  /* ---------- Ricalca ---------- */
+  .game.g-trace{ background:linear-gradient(160deg,var(--mint),var(--mint-dk)); }
+  #trace{ display:none; }
+  #traceCanvas{ display:block; border-radius:20px; box-shadow:var(--shadow); background:#FBF7EE; touch-action:none; }
+  .trace-stickers{ font-size:1.3rem; letter-spacing:.12em; min-height:1.7em; margin:2px 0 8px; opacity:.9; }
+
+  /* ---------- Bolle (causa-effetto per i più piccini) ---------- */
+  .game.g-bolle{ background:linear-gradient(160deg,#EFC3A8,#E0AC8E); }
+  #bolle{ display:none; }
+  #bolleCanvas{ display:block; border-radius:20px; box-shadow:var(--shadow); background:#FDFAF3; touch-action:none; }
+
+  /* ---------- Conta ---------- */
+  .game.g-conta{ background:linear-gradient(160deg,var(--olive),var(--olive-dk)); }
+  .game.g-bolidi{ background:linear-gradient(160deg,#E39B9B,#D48484); }   /* nono gioco: rosso tenue corsa */
+
+  /* ---------- Area genitori + limite tempo ---------- */
+  .parents-link{
+    margin-top:22px; border:none; cursor:pointer;
+    background:transparent; color:var(--ink-soft);
+    font-family:inherit; font-weight:500; font-size:.9rem;
+    padding:8px 14px; border-radius:999px;
+  }
+  .parents-link:hover{ background:rgba(120,100,70,.08); }
+  .par-overlay{
+    position:fixed; inset:0; z-index:9000;
+    background:rgba(94,81,66,.45); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+  .par-card{
+    background:var(--front); border-radius:26px; box-shadow:var(--shadow);
+    padding:26px 22px; width:min(92vw,420px); text-align:center; color:var(--ink);
+  }
+  .par-card h2{ margin:.1em 0 .5em; font-size:1.35rem; }
+  .par-card .par-q{ font-size:1.6rem; font-weight:600; margin:.4em 0 .7em; }
+  .par-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:.4em 0 .9em; }
+  .par-opt{
+    border:none; cursor:pointer; font-family:inherit; font-weight:600;
+    background:#F1EADB; color:var(--ink); border-radius:14px;
+    padding:10px 16px; font-size:1.05rem; transition:transform .1s, background .15s;
+  }
+  .par-opt:active{ transform:scale(.95); }
+  .par-opt.sel{ background:linear-gradient(160deg,var(--sage),var(--sage-dk)); color:#fff; }
+  .par-opt.wrong{ background:#E6A896; color:#fff; animation:parShake .3s; }
+  @keyframes parShake{ 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .par-lab{ font-size:.85rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase;
+            letter-spacing:.6px; margin:1.1em 0 .3em; }
+  .par-info{ font-size:.92rem; color:var(--ink-soft); margin:.3em 0 .6em; }
+  .par-close{
+    margin-top:14px; border:none; cursor:pointer; font-family:inherit; font-weight:600;
+    background:#F1EADB; color:var(--ink); border-radius:999px; padding:10px 26px; font-size:1rem;
+  }
+  .par-reset{ background:transparent; border:none; cursor:pointer; font-family:inherit;
+              color:var(--ink-soft); font-size:.88rem; text-decoration:underline; margin-top:6px; }
+  #parent{ z-index:9200; }                 /* l'area genitori sta sopra il blocco tempo */
+  .timeup .par-card .big-moon{ font-size:3.2rem; margin-bottom:.2em; }
+  .timeup .par-card p{ color:var(--ink-soft); font-weight:500; }
+  .timeup .tiny{ margin-top:18px; background:transparent; border:none; cursor:pointer;
+                 font-family:inherit; color:var(--ink-soft); font-size:.85rem; padding:6px 10px; }
+  #conta{ display:none; }
+  .conta-obj{
+    display:flex; flex-wrap:wrap; gap:clamp(8px,3vw,20px);
+    justify-content:center; align-content:center; align-items:center;
+    background:#FBF7EE; border-radius:20px; box-shadow:var(--shadow);
+    padding:18px 14px; min-height:clamp(150px,30vh,250px);
+    width:min(94vw,460px); margin:0 auto;
+  }
+  .conta-obj span{
+    font-size:clamp(2.2rem,11vw,3.4rem); line-height:1; cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .conta-obj span.contato{ transform:scale(.84); opacity:.5; }
+  .conta-scelte{ display:flex; gap:clamp(16px,7vw,40px); justify-content:center; margin:18px auto 0; }
+  .conta-num{
+    border:none; cursor:pointer; font-family:inherit; font-weight:700; color:var(--ink);
+    background:#fff; border-radius:26px; box-shadow:var(--shadow);
+    width:clamp(96px,30vw,132px); height:clamp(96px,30vw,132px);
+    font-size:clamp(3rem,13vw,4.2rem); line-height:1;
+    transition:transform .12s ease, background .2s ease;
+  }
+  .conta-num:active{ transform:scale(.95); }
+  .conta-num.giusto{ background:#DDEBCF; box-shadow:0 0 0 5px rgba(123,160,91,.45), var(--shadow); }
+  .conta-num.sbagliato{ background:#F6DED8; animation:nudge .45s ease; }
+
+  /* ---------- Schermata iniziale ---------- */
+  #start h1, #menu h1, #traceStart h1{
+    font-size:clamp(2rem,8vw,3.2rem); font-weight:700; margin:.2em 0 .1em;
+    letter-spacing:.5px;
+  }
+  #start .sub, #menu .sub, #traceStart .sub{ font-size:clamp(1rem,4vw,1.3rem); color:var(--ink-soft); margin-bottom:1.6em; font-weight:500; line-height:1.5;}
+  .emoji-row{ font-size:clamp(2rem,10vw,3rem); margin:.1em 0 .5em; letter-spacing:.15em;}
+  .levels{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap;}
+  .lvl{
+    border:none; cursor:pointer; color:#fff;
+    font-family:inherit; font-weight:600;
+    border-radius:26px; padding:22px 26px;
+    width:min(42vw,230px); box-shadow:var(--shadow);
+    transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .lvl .big{ font-size:clamp(2.4rem,9vw,3.2rem); line-height:1;}
+  .lvl .age{ font-size:clamp(1.3rem,5vw,1.7rem);}
+  .lvl .hint{ font-size:.95rem; font-weight:500; opacity:.92;}
+  .lvl.a{ background:linear-gradient(160deg,var(--coral),var(--coral-dk));}
+  .lvl.b{ background:linear-gradient(160deg,var(--sage),var(--sage-dk));}
+  .lvl:hover{ transform:translateY(-3px); filter:brightness(1.03);}
+  .lvl:active{ transform:translateY(0) scale(.98);}
+
+  /* ---------- Schermata gioco ---------- */
+  #game{ display:none;}
+  .bar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:10px;
+  }
+  .btn-soft{
+    border:none; cursor:pointer; font-family:inherit; font-weight:600;
+    color:var(--ink); background:#fff; border-radius:16px;
+    padding:10px 16px; font-size:1rem; box-shadow:var(--shadow);
+    transition:transform .1s, filter .1s;
+  }
+  .btn-soft:hover{ filter:brightness(.98);}
+  .btn-soft:active{ transform:scale(.96);}
+  .pairs{
+    font-weight:600; font-size:clamp(1.05rem,4.5vw,1.3rem);
+    background:#fff; border-radius:16px; padding:10px 18px; box-shadow:var(--shadow);
+  }
+  .pairs .n{ color:var(--sage-dk);}
+  .icon-btn{ min-width:52px; font-size:1.25rem;}
+
+  /* uscita protetta: si esce solo tenendo premuto 2 secondi */
+  .btn-hold{
+    background-image:linear-gradient(to right, rgba(157,187,139,.60) var(--hold,0%), rgba(0,0,0,0) var(--hold,0%));
+    background-repeat:no-repeat;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1px; padding:7px 14px; line-height:1.05;
+  }
+  .hold-lab{ font-size:1rem; font-weight:600; }
+  .hold-hint{ font-size:.6rem; font-weight:500; opacity:.55; letter-spacing:.2px; white-space:nowrap; }
+  .btn-hold.nudge .hold-hint{ opacity:1; color:#C2603F; font-weight:700; }
+  .bar .btn-hold, .bar .icon-btn{ flex:0 0 auto; }              /* non si restringono mai */
+  .bar .pairs, .bar #traceName, .bar #bolleTitle{
+    flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .btn-hold.nudge{ animation:nudge .45s ease; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+  .level-tag{
+    font-weight:600; color:var(--ink-soft); margin:2px 0 16px;
+    font-size:clamp(1rem,4vw,1.2rem);
+  }
+
+  .board-area{ position:relative; display:inline-block; }
+  .preview-overlay{
+    position:absolute; inset:0; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(248,242,231,.5); backdrop-filter:blur(2px);
+    border-radius:24px;
+  }
+  .preview-btn{
+    border:none; cursor:pointer; color:#fff; font-family:inherit; font-weight:700;
+    background:linear-gradient(160deg,var(--coral),var(--coral-dk));
+    border-radius:24px; padding:18px 26px; font-size:clamp(1.1rem,4.5vw,1.4rem);
+    box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:8px;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  .preview-btn .pv-emoji{ font-size:clamp(2rem,9vw,2.8rem); line-height:1; }
+  .preview-btn:active{ transform:scale(.97); }
+  @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.05);} }
+
+  #board{ display:grid; gap:clamp(9px,2.6vw,18px); margin:0 auto; justify-content:center;}
+  #board.small{ grid-template-columns:repeat(3,1fr); width:min(88vw,440px);}
+  #board.large{ grid-template-columns:repeat(4,1fr); width:min(92vw,640px);}
+
+  .card{
+    position:relative; aspect-ratio:1/1; cursor:pointer;
+    perspective:900px; border:none; background:transparent; padding:0;
+    animation:pop .35s ease both;
+  }
+  @keyframes pop{ from{opacity:0; transform:scale(.7);} to{opacity:1; transform:scale(1);} }
+  .inner{
+    position:absolute; inset:0; transform-style:preserve-3d;
+    transition:transform .45s cubic-bezier(.4,.9,.3,1);
+  }
+  .card.flipped .inner{ transform:rotateY(180deg);}
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden;
+    border-radius:20px; display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .back{
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 45%),
+      linear-gradient(160deg,var(--back1),var(--back2));
+  }
+  .back::after{ content:attr(data-motif); font-size:clamp(1.6rem,7vw,2.6rem); opacity:.32;}
+  .front{
+    background:var(--front); transform:rotateY(180deg);
+    font-size:clamp(2.2rem,12vw,4.4rem); border:3px solid #F0E7D6;
+  }
+  .card.matched .front{
+    border-color:var(--match);
+    box-shadow:0 0 0 4px rgba(235,201,120,.35), var(--shadow);
+    animation:found .5s ease;
+  }
+  @keyframes found{ 0%,100%{transform:rotateY(180deg) scale(1);} 40%{transform:rotateY(180deg) scale(1.12);} }
+  .card.matched{ cursor:default;}
+
+  /* schermi stretti */
+  @media(max-width:380px){
+    #board.small{ grid-template-columns:repeat(2,1fr); width:min(80vw,300px);}
+    #board.large{ grid-template-columns:repeat(3,1fr); width:min(92vw,360px);}
+  }
+
+  /* ---------- Vittoria / passaggio livello ---------- */
+  #win{
+    display:none; position:fixed; inset:0; z-index:50;
+    background:rgba(94,81,66,.34); backdrop-filter:blur(3px);
+    align-items:center; justify-content:center; padding:0;
+  }
+  .win-card{
+    width:96vw; max-width:720px; height:94vh;
+    display:flex; flex-direction:column; align-items:stretch; gap:1.4vh;
+    background:none; box-shadow:none; padding:0;
+    animation:pop .35s ease both;
+  }
+  .win-card .star{ font-size:clamp(2rem,7vw,3rem); text-align:center; margin:0; flex:0 0 auto; }
+  .win-card h2{ font-size:2rem; margin:.2em 0 .1em; font-weight:700;}
+  .win-card p{ color:var(--ink-soft); font-weight:500; margin:.2em 0 1.2em; font-size:1.15rem;}
+  .win-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .win-actions button{
+    border:none; cursor:pointer; color:#fff; font-family:inherit; font-weight:600;
+    border-radius:20px; padding:14px 20px; font-size:1.05rem; box-shadow:var(--shadow);
+    transition:transform .1s, filter .1s;
+  }
+  .win-actions button:hover{ filter:brightness(1.03);}
+  .win-actions button:active{ transform:scale(.96);}
+  .again{ background:linear-gradient(160deg,var(--sage),var(--sage-dk));}
+  .change{ background:linear-gradient(160deg,var(--coral),var(--coral-dk));}
+
+  /* pulsanti a freccia di fine livello: enormi, riempiono lo schermo */
+  .win-next, .win-back{
+    display:flex; align-items:center; justify-content:center; width:100%;
+    border:none; cursor:pointer; border-radius:28px; box-shadow:var(--shadow);
+    transition:transform .1s, filter .1s;
+  }
+  .win-next{ background:#E3F0D8; flex:1 1 auto; min-height:34vh; margin:0; }
+  .win-back{ background:#F5DCD5; flex:0 0 22vh; min-height:110px; }
+  .win-next:hover, .win-back:hover{ filter:brightness(1.02); }
+  .win-next:active, .win-back:active{ transform:scale(.98); }
+  .win-next svg{ height:72%; width:auto; fill:#5DA23C; }
+  .win-back svg{ height:64%; width:auto; fill:#D2593F; }
+
+  /* coriandoli */
+  .confetti{ position:fixed; top:-40px; z-index:60; pointer-events:none; will-change:transform;
+    animation:fall linear forwards;}
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:.9;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- MENU GIOCHI (schermata iniziale) -->
+  <section id="menu">
+    <div class="emoji-row">👆 🔗 🧠 🌀 🎨 ✏️ 🔢 🏎️</div>
+    <h1>Scegli il gioco</h1>
+    <p class="sub">Nove giochi per divertirsi e imparare</p>
+    <div class="games">
+      <button class="game g-bolle" onclick="openBolle()">
+        <span class="big">👆</span>
+        <span class="gname">Tocca!</span>
+        <span class="gage">1/3 anni</span>
+      </button>
+      <button class="game g-abb" onclick="openAbbinamenti()">
+        <span class="big">🔗</span>
+        <span class="gname">Abbinamenti</span>
+        <span class="gage">3/6 anni</span>
+      </button>
+      <button class="game g-memory" onclick="openMemory()">
+        <span class="big">🧠</span>
+        <span class="gname">Memory</span>
+        <span class="gage">3/6 anni</span>
+      </button>
+      <button class="game g-maze" onclick="openLabirinto()">
+        <span class="big">🌀</span>
+        <span class="gname">Labirinto</span>
+        <span class="gage">5+ anni</span>
+      </button>
+      <button class="game g-stamp" onclick="openStampini()">
+        <span class="big">🎨</span>
+        <span class="gname">Stampini</span>
+        <span class="gage">3+ anni</span>
+      </button>
+      <button class="game g-trace" onclick="openRicalca()">
+        <span class="big">✏️</span>
+        <span class="gname">Ricalca</span>
+        <span class="gage">3/6 anni</span>
+      </button>
+      <button class="game g-conta" onclick="openConta()">
+        <span class="big">🔢</span>
+        <span class="gname">Conta</span>
+        <span class="gage">4+ anni</span>
+      </button>
+      <button class="game g-bolidi" onclick="openBolidi()">
+        <span class="big">🏎️</span>
+        <span class="gname">Bolidi</span>
+        <span class="gage">4+ anni</span>
+      </button>
+      <button type="button" class="game g-seq soon">
+        <span class="big">🔁</span>
+        <span class="gname">Sequenza</span>
+        <span class="gage">5+ anni</span>
+        <span class="badge">presto</span>
+      </button>
+    </div>
+    <button id="parentsLink" class="parents-link" onclick="parOpen()">🔒 <span>Genitori</span></button>
+  </section>
+
+  <!-- MEMORY: scelta dell'età -->
+  <section id="start">
+    <div class="subbar"><button class="btn-soft" onclick="goToMenu()">← Giochi</button></div>
+    <div class="emoji-row">🐶 🚗 🍎</div>
+    <h1>Memory a Livelli</h1>
+    <p class="sub">Scegli l'età. Per ogni età ci sono 3 livelli da superare:<br>animali 🐾, mezzi di trasporto 🚗 e frutta 🍎</p>
+    <div class="levels">
+      <button class="lvl a" onclick="startGame('small')">
+        <span class="big">🐣</span>
+        <span class="age">3 anni</span>
+        <span class="hint">6 carte · più facile</span>
+      </button>
+      <button class="lvl b" onclick="startGame('large')">
+        <span class="big">🦉</span>
+        <span class="age">6 anni</span>
+        <span class="hint">12 carte · più impegnativo</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- SCHERMATA GIOCO -->
+  <section id="game">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="backToStart" title="Tieni premuto 2 secondi"><span class="hold-lab">← Indietro</span><span class="hold-hint">tieni premuto</span></button>
+      <div class="pairs">Coppie: <span class="n" id="found">0</span>/<span id="total">3</span></div>
+      <button class="btn-soft icon-btn" id="sound" onclick="toggleSound()" title="Suono">🔊</button>
+    </div>
+    <div class="level-tag" id="levelTag">Livello 1 di 3 · Animali 🐾</div>
+    <div class="board-area">
+      <div id="board"></div>
+      <div class="preview-overlay" id="previewOverlay">
+        <button class="preview-btn" onclick="startPreview()">
+          <span class="pv-emoji">👀</span>
+          <span>Mostra le carte</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LABIRINTO -->
+  <section id="maze">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="goToMenu" title="Tieni premuto 2 secondi"><span class="hold-lab">← Giochi</span><span class="hold-hint">tieni premuto</span></button>
+      <div class="pairs" id="mazeTag">Livello 1 di 3</div>
+      <button class="btn-soft icon-btn" onclick="restartMazeLevel()" title="Ricomincia">↺</button>
+    </div>
+    <div class="level-tag" id="mazeTitle">Porta l'astronauta sulla Luna</div>
+    <div class="board-area"><canvas id="mazeCanvas"></canvas></div>
+    <p class="maze-hint">Tieni il dito premuto sul personaggio e guidalo fino alla meta. Le pareti non si attraversano. Se stacchi il dito, riparti da dove eri.</p>
+  </section>
+
+  <!-- ABBINAMENTI -->
+  <section id="abb">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="goToMenu" title="Tieni premuto 2 secondi"><span class="hold-lab">← Giochi</span><span class="hold-hint">tieni premuto</span></button>
+      <div class="pairs">Abbinati: <span class="n" id="abbFound">0</span>/<span id="abbTotal">4</span></div>
+      <button class="btn-soft icon-btn" onclick="restartAbbLevel()" title="Ricomincia">↺</button>
+    </div>
+    <div class="level-tag" id="abbTitle">Livello 1 di 6</div>
+    <div class="board-area"><canvas id="abbCanvas"></canvas></div>
+    <p class="maze-hint">Collega ogni figura di sinistra con quella giusta a destra: trascina il dito da una all'altra, oppure tocca prima una e poi l'altra.</p>
+  </section>
+
+  <!-- STAMPINI -->
+  <section id="stamp">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="goToMenu" title="Tieni premuto 2 secondi"><span class="hold-lab">← Giochi</span><span class="hold-hint">tieni premuto</span></button>
+      <div class="pairs">Stampini</div>
+      <button class="btn-soft icon-btn" onclick="stampClear()" title="Pulisci tutto">🗑️</button>
+    </div>
+    <div class="board-area"><canvas id="stampCanvas"></canvas></div>
+    <div class="stamp-tools">
+      <button class="stamp-tool" id="stampBtn" onclick="stampCycle()" title="Cambia stampino"><span id="stampGlyph">⭐</span></button>
+      <button class="stamp-tool" id="eraserBtn" onclick="stampEraser()" title="Gomma">🧽</button>
+    </div>
+  </section>
+
+  <!-- BOLLE -->
+  <section id="bolle">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="goToMenu" title="Tieni premuto 2 secondi"><span class="hold-lab">← Giochi</span><span class="hold-hint">tieni premuto</span></button>
+      <button class="btn-soft" id="bolleTitle" onclick="bolleMode()" title="Cambia gioco">Bolle 🎈</button>
+      <button class="btn-soft icon-btn" onclick="bolleReset()" title="Ricomincia">↺</button>
+    </div>
+    <div class="board-area"><canvas id="bolleCanvas"></canvas></div>
+    <p class="maze-hint">Tocca lo schermo: succede sempre qualcosa. Premi il nome in alto per cambiare gioco.</p>
+  </section>
+
+  <!-- CONTA -->
+  <section id="conta">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="goToMenu" title="Tieni premuto 2 secondi"><span class="hold-lab">← Giochi</span><span class="hold-hint">tieni premuto</span></button>
+      <div class="pairs">Conta 🔢</div>
+      <button class="btn-soft icon-btn" onclick="contaNuovo()" title="Un'altra">🔀</button>
+    </div>
+    <div class="trace-stickers" id="contaStickers"></div>
+    <div class="conta-obj" id="contaObj"></div>
+    <div class="conta-scelte" id="contaScelte"></div>
+    <p class="maze-hint">Quanti sono? Tocca il numero giusto. Puoi toccare gli oggetti uno per uno per contarli.</p>
+  </section>
+
+  <!-- RICALCA: scelta dell'età -->
+  <section id="traceStart">
+    <div class="subbar"><button class="btn-soft" onclick="goToMenu()">← Giochi</button></div>
+    <div class="emoji-row">✏️ 〰️ 🔤</div>
+    <h1>Ricalca</h1>
+    <p class="sub">Segui la linea con il dito</p>
+    <div class="levels">
+      <button class="lvl a" onclick="startTrace('forme')">
+        <span class="big">🌈</span>
+        <span class="age">3 anni</span>
+        <span class="hint">forme e linee</span>
+      </button>
+      <button class="lvl b" onclick="startTrace('lettere')">
+        <span class="big">🔤</span>
+        <span class="age">6 anni</span>
+        <span class="hint">lettere stampatello</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- RICALCA -->
+  <section id="trace">
+    <div class="bar">
+      <button class="btn-soft btn-hold" data-hold="traceBack" title="Tieni premuto 2 secondi"><span class="hold-lab">← Indietro</span><span class="hold-hint">tieni premuto</span></button>
+      <button class="btn-soft" id="traceName" onclick="traceModo()" title="Lettere o parole">La pioggia 🌧️</button>
+      <button class="btn-soft icon-btn" onclick="traceSkip()" title="Un'altra">🔀</button>
+    </div>
+    <div class="trace-stickers" id="traceStickers"></div>
+    <div class="board-area"><canvas id="traceCanvas"></canvas></div>
+    <p class="maze-hint" id="traceHint">Segui la linea con il dito, partendo dal pallino verde. Quando la figura è finita, un'altra arriva da sola.</p>
+  </section>
+
+</div>
+
+<!-- VITTORIA -->
+<div id="win">
+  <div class="win-card">
+    <div class="star" id="winStar">🎉</div>
+    <button class="win-next" id="winNext" aria-label="Prossimo">
+      <svg viewBox="0 0 100 100"><path d="M8 38 H58 V20 L94 50 L58 80 V62 H8 Z"/></svg>
+    </button>
+    <button class="win-back" id="winBack" aria-label="Indietro">
+      <svg viewBox="0 0 100 100"><path d="M92 38 H42 V20 L6 50 L42 80 V62 H92 Z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- AREA GENITORI: cancelletto + impostazioni (contenuti generati da JS, bilingue) -->
+<div id="parent" class="par-overlay" style="display:none">
+  <div class="par-card" id="parCard"></div>
+</div>
+
+<!-- BLOCCO TEMPO ESAURITO (contenuti generati da JS, bilingue) -->
+<div id="timeup" class="par-overlay timeup" style="display:none">
+  <div class="par-card" id="timeupCard"></div>
+</div>
+
+<script>
+/* ---------- I 3 livelli a tema (in ordine) ---------- */
+const THEMES = [
+  { name:'Animali',            emoji:'🐾', items:['🐶','🐱','🐰','🐸','🐷','🦁'] },
+  { name:'Mezzi di trasporto', emoji:'🚗', items:['🚗','🚌','🚂','🚁','🚲','🚀'] },
+  { name:'Frutta',             emoji:'🍎', items:['🍎','🍌','🍓','🍇','🍊','🍉'] },
+  { name:'Mare',               emoji:'🐬', items:['🐠','🐙','🦀','🐳','🐢','🦈'] },
+  { name:'Giardino',           emoji:'🌻', items:['🌻','🌷','🌼','🍄','🐝','🦋'] },
+  { name:'Dolci',              emoji:'🍩', items:['🍩','🍪','🧁','🍫','🍬','🍦'] },
+  { name:'Sport',              emoji:'⚽', items:['⚽','🏀','🎾','🏐','🏈','⚾'] },
+  { name:'Cielo',              emoji:'🌙', items:['🌙','⭐','☀️','☁️','🌈','⚡'] }
+];
+/* Quante coppie per età (le carte sono il doppio) */
+const AGES = {
+  small: { pairs:3, cls:'small' },   // 3 anni  -> 6 carte
+  large: { pairs:6, cls:'large' }    // 6 anni  -> 12 carte
+};
+/* Secondi in cui le carte restano scoperte, per età */
+const PREVIEW = { small:6, large:4 };
+
+let ageKey     = 'small';
+let themeIndex = 0;        // 0=animali, 1=mezzi, 2=frutta
+let firstCard  = null;
+let lock       = false;    // blocca i click durante il controllo di una coppia
+let found      = 0;
+let previewTimer = null;   // timer del conto alla rovescia dell'anteprima
+
+/* ---------- Navigazione ---------- */
+function goToMenu(){              // torna al menu di scelta del gioco
+  clearPreview();
+  mzDragging = false; abbDragging = false; stDrawing = false; trDrawing = false;
+  document.getElementById('win').style.display   = 'none';
+  document.getElementById('game').style.display  = 'none';
+  document.getElementById('start').style.display = 'none';
+  const mz = document.getElementById('maze'); if (mz) mz.style.display = 'none';
+  const ab = document.getElementById('abb'); if (ab) ab.style.display = 'none';
+  const st = document.getElementById('stamp'); if (st) st.style.display = 'none';
+  const tr = document.getElementById('trace'); if (tr) tr.style.display = 'none';
+  const ts = document.getElementById('traceStart'); if (ts) ts.style.display = 'none';
+  const bo = document.getElementById('bolle'); if (bo) bo.style.display = 'none';
+  const cn = document.getElementById('conta'); if (cn) cn.style.display = 'none';
+  document.getElementById('menu').style.display  = 'block';
+}
+function openMemory(){            // apre il gioco Memory (scelta età)
+  document.getElementById('menu').style.display  = 'none';
+  document.getElementById('start').style.display = 'block';
+}
+function startGame(which){
+  ageKey = which;
+  themeIndex = 0;                 // si riparte sempre dal 1° livello (animali)
+  initAudio();                    // sblocca l'audio al primo tocco
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('game').style.display  = 'block';
+  buildBoard();
+}
+function nextLevel(){             // avanza al livello a tema successivo
+  themeIndex++;
+  document.getElementById('win').style.display = 'none';
+  buildBoard();
+}
+function restartAge(){           // rigioca dall'inizio con la stessa età
+  themeIndex = 0;
+  document.getElementById('win').style.display = 'none';
+  buildBoard();
+}
+function backToStart(){
+  clearPreview();
+  document.getElementById('win').style.display   = 'none';
+  document.getElementById('game').style.display  = 'none';
+  document.getElementById('start').style.display = 'block';
+}
+
+/* ---------- Costruzione tabellone ---------- */
+function buildBoard(){
+  clearPreview();
+  const age   = AGES[ageKey];
+  const theme = THEMES[themeIndex];
+  found = 0; firstCard = null; lock = true;   // bloccato finché l'anteprima non finisce
+
+  // mazzo: N elementi del tema, ciascuno x2, poi mescola
+  let deck = [];
+  for (let i=0;i<age.pairs;i++){ deck.push(theme.items[i], theme.items[i]); }
+  shuffle(deck);
+
+  document.getElementById('found').textContent = '0';
+  document.getElementById('total').textContent = age.pairs;
+  document.getElementById('levelTag').textContent =
+    GB.lvl(themeIndex+1, THEMES.length) + ' · ' + GB.trn(theme.name) + ' ' + theme.emoji;
+
+  const board = document.getElementById('board');
+  board.className = age.cls;
+  board.innerHTML = '';
+  deck.forEach((emoji, idx) => {
+    const card = document.createElement('button');
+    card.className = 'card';
+    card.style.animationDelay = (idx*0.04) + 's';
+    card.dataset.emoji = emoji;
+    card.innerHTML =
+      '<div class="inner">' +
+        '<div class="face back" data-motif="' + theme.emoji + '"></div>' +
+        '<div class="face front">' + emoji + '</div>' +
+      '</div>';
+    card.addEventListener('click', () => flip(card));
+    board.appendChild(card);
+  });
+
+  // 3 anni: niente attesa/anteprima (i piccoli non capiscono il momento di memorizzazione):
+  //          carte coperte e subito giocabili.
+  // 6 anni: mostra il pulsante di anteprima "Mostra le carte".
+  if (ageKey === 'small'){
+    lock = false;
+    document.getElementById('previewOverlay').style.display = 'none';
+  } else {
+    document.getElementById('previewOverlay').style.display = 'flex';
+  }
+}
+
+/* ---------- Anteprima carte (scopri, memorizza, si coprono) ---------- */
+function clearPreview(){
+  if (previewTimer){ clearInterval(previewTimer); previewTimer = null; }
+}
+function startPreview(){
+  document.getElementById('previewOverlay').style.display = 'none';
+  const cards = Array.from(document.querySelectorAll('#board .card'));
+  cards.forEach(c => c.classList.add('flipped'));   // scopre tutte le carte
+  playFlip();
+
+  const tag = document.getElementById('levelTag');
+  const normalTag = tag.textContent;                // testo del livello da ripristinare
+  let secs = PREVIEW[ageKey];                        // 6 (3 anni) oppure 4 (6 anni)
+  tag.textContent = GB.t('memorize') + secs;
+
+  clearPreview();
+  previewTimer = setInterval(() => {
+    secs--;
+    if (secs > 0){
+      tag.textContent = GB.t('memorize') + secs;
+    } else {
+      clearInterval(previewTimer); previewTimer = null;
+      cards.forEach(c => c.classList.remove('flipped'));   // le carte si coprono da sole
+      tag.textContent = normalTag;
+      lock = false;                                         // ora si può giocare
+    }
+  }, 1000);
+}
+
+/* ---------- Logica di gioco ---------- */
+function flip(card){
+  if (lock) return;
+  if (card.classList.contains('flipped')) return;   // già girata
+  if (card.classList.contains('matched')) return;   // già abbinata
+
+  card.classList.add('flipped');
+  playFlip();
+
+  if (!firstCard){ firstCard = card; return; }      // prima carta della coppia
+
+  lock = true;                                       // seconda carta: confronta
+  if (card.dataset.emoji === firstCard.dataset.emoji){
+    const a = firstCard, b = card;
+    setTimeout(() => {
+      a.classList.add('matched');
+      b.classList.add('matched');
+      playMatch();
+      firstCard = null; lock = false;
+      found++;
+      document.getElementById('found').textContent = found;
+      if (found === AGES[ageKey].pairs) setTimeout(win, 550);
+    }, 300);
+  } else {
+    const a = firstCard, b = card;
+    playNoMatch();
+    setTimeout(() => {
+      a.classList.remove('flipped');
+      b.classList.remove('flipped');
+      firstCard = null; lock = false;
+    }, 850);
+  }
+}
+
+/* ---------- Vittoria / passaggio di livello ---------- */
+function win(){
+  playWin(); confetti();
+  const isLast = themeIndex >= THEMES.length - 1;
+  document.getElementById('winStar').textContent = isLast ? '🏆' : '🎉';
+  document.getElementById('winNext').onclick = isLast ? restartAge : nextLevel;
+  document.getElementById('winBack').onclick = backToStart;
+  document.getElementById('win').style.display = 'flex';
+}
+
+/* niente selezione del testo né menu contestuale al tocco prolungato */
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+/* ---------- Uscita protetta: tieni premuto 2 secondi ----------
+   Evita che un dito piccolo esca dal gioco per sbaglio.            */
+const HOLD_MS = 2000;
+function setupHold(){
+  const azioni = { goToMenu:goToMenu, backToStart:backToStart, traceBack:traceBack };
+  const btns = document.querySelectorAll('[data-hold]');
+  for (let i=0;i<btns.length;i++){
+    (function(btn){
+      const fn = azioni[btn.getAttribute('data-hold')];
+      let raf = null, t0 = 0;
+      function step(){
+        const p = Math.min(1, (nowMs()-t0)/HOLD_MS);
+        btn.style.setProperty('--hold', (p*100)+'%');
+        if (p >= 1){ annulla(false); if (fn) fn(); return; }
+        raf = requestAnimationFrame(step);
+      }
+      function annulla(scuoti){
+        if (raf !== null){ cancelAnimationFrame(raf); raf = null; }
+        btn.style.setProperty('--hold','0%');
+        if (scuoti){                                   // rilasciato troppo presto: lo segnala
+          btn.classList.remove('nudge'); void btn.offsetWidth; btn.classList.add('nudge');
+          clearTimeout(btn._holdT);
+          btn._holdT = setTimeout(function(){ btn.classList.remove('nudge'); }, 1600);
+        }
+      }
+      btn.addEventListener('pointerdown', function(e){
+        t0 = nowMs(); if (raf === null) step(); e.preventDefault();
+      });
+      btn.addEventListener('pointerup',     function(){ if (raf !== null) annulla(true); });   // troppo presto
+      btn.addEventListener('pointerleave',  function(){ if (raf !== null) annulla(false); });
+      btn.addEventListener('pointercancel', function(){ if (raf !== null) annulla(false); });
+    })(btns[i]);
+  }
+}
+setupHold();
+
+/* ================= CONTA =================
+   Sopra da 1 a 6 oggetti, sotto due numeri. Toccando gli oggetti si contano
+   uno per uno (corrispondenza uno-a-uno) con una nota che sale.            */
+const CONTA_EMOJI = ['🍎','🐟','⭐','🌸','🐞','🎈','🍓','🐤','🦋','🍋','🐢','🌻','🚗','🐝','🍇','🐱'];
+const CONTA_NOTE  = [392,440,494,523,587,659,698,784,880,988];
+let contaN = 0, contaEm = '', contaOpts = [], contaLock = false, contaStickers = [];
+
+function openConta(){
+  document.getElementById('menu').style.display  = 'none';
+  document.getElementById('win').style.display   = 'none';
+  document.getElementById('conta').style.display = 'block';
+  initAudio();
+  contaNuovo();
+}
+function contaNuovo(){
+  contaLock = false;
+  const max = (contaStickers.length >= 8) ? 10 : 6;   // dopo 8 risposte giuste si arriva a 10
+  contaN  = 1 + Math.floor(Math.random()*max);
+  contaEm = CONTA_EMOJI[Math.floor(Math.random()*CONTA_EMOJI.length)];
+  let d = contaN + (Math.random() < 0.5 ? -1 : 1);     // il numero sbagliato sta vicino
+  if (d < 1) d = contaN + 1;
+  if (d > max) d = contaN - 1;
+  contaOpts = (Math.random() < 0.5) ? [contaN, d] : [d, contaN];
+  contaRender();
+}
+function contaRender(){
+  const box = document.getElementById('contaObj');
+  box.innerHTML = '';
+  for (let i=0;i<contaN;i++){
+    const s = document.createElement('span');
+    s.textContent = contaEm;
+    s.addEventListener('click', function(){ contaTocca(s); });
+    box.appendChild(s);
+  }
+  const sc = document.getElementById('contaScelte');
+  sc.innerHTML = '';
+  contaOpts.forEach(function(v){
+    const b = document.createElement('button');
+    b.className = 'conta-num';
+    b.textContent = v;
+    b.addEventListener('click', function(){ contaScegli(v, b); });
+    sc.appendChild(b);
+  });
+}
+function contaTocca(el){                                // contare toccando, uno alla volta
+  if (contaLock || el.classList.contains('contato')) return;
+  el.classList.add('contato');
+  const n = document.querySelectorAll('#contaObj .contato').length;
+  tone(CONTA_NOTE[Math.min(n-1, CONTA_NOTE.length-1)], 0.22, 0.06, 0);
+}
+function contaScegli(v, btn){
+  if (contaLock) return;
+  if (v === contaN){
+    contaLock = true;
+    btn.classList.add('giusto');
+    playMatch();
+    contaStickers.push(contaEm);
+    if (contaStickers.length > 12) contaStickers.shift();
+    document.getElementById('contaStickers').textContent = contaStickers.join(' ');
+    setTimeout(contaNuovo, 1000);                       // il turno dopo arriva da solo
+  } else {
+    btn.classList.add('sbagliato');
+    playNoMatch();
+    setTimeout(function(){ btn.classList.remove('sbagliato'); }, 650);
+  }
+}
+
+/* ================= BOLLE =================
+   Gioco causa-effetto per i più piccini: nessun obiettivo, nessun errore possibile,
+   ogni tocco produce subito un effetto. Non finisce mai.                        */
+const BO_EMOJI = ['🐶','🐱','🐰','🐸','🐷','🦁','🐤','🐝','🐠','🦋','⭐','🍎','🍓','🐢','🐭','🌼'];
+const BO_COL   = ['#F2C6B6','#CBE0BC','#E7D6EF','#F5DFA8','#F3C9D8','#CDE6DE'];
+const BO_FW    = ['#E08A55','#D9A441','#C77BA0','#7BA05B','#C2603F','#9A7BC8'];   // fuochi: più vivaci
+const BO_MODES = [
+  { key:'bolle',  label:'Bolle 🎈' },
+  { key:'fuochi', label:'Fuochi 🎆' },
+  { key:'musica', label:'Musica 🎵' }
+];
+const BO_SCALA = [392,440,523,587,659,784];    // pentatonica: qualunque tocco suona bene
+let boMode = 0, boLastAuto = 0;
+let boCanvas=null, boCtx=null, boW=0, boH=0;
+let boList=[], boFx=[], boRaf=null, boReady=false, boT=0;
+
+function boKey(){ return BO_MODES[boMode].key; }
+function bolleMode(){                                   // il titolo cambia gioco
+  boMode = (boMode+1) % BO_MODES.length;
+  document.getElementById('bolleTitle').textContent = GB.trn(BO_MODES[boMode].label);
+  boFx = []; boLastAuto = 0;
+  playPick();
+  ensureBoLoop();
+}
+function boFirework(x, y){
+  const col = BO_FW[Math.floor(Math.random()*BO_FW.length)];
+  const parts = [];
+  for (let i=0;i<26;i++){
+    const a = Math.random()*Math.PI*2, sp = 1.3 + Math.random()*2.7;
+    parts.push({ x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, r:2+Math.random()*3 });
+  }
+  boFx.push({ k:'fw', t0:nowMs(), life:1500, col:col, parts:parts });
+  playFirework();
+}
+function boNota(x, y){
+  const n = BO_SCALA.length;
+  let i = Math.floor((1 - y/boH)*n);                    // in alto note acute, in basso gravi
+  i = Math.max(0, Math.min(n-1, i));
+  tone(BO_SCALA[i], 0.5, 0.06, 0);
+  tone(BO_SCALA[i]*2, 0.28, 0.02, 0.01);
+  boFx.push({ k:'nota', t0:nowMs(), life:900, x:x, y:y, band:i,
+              em:['🎵','🎶','⭐','✨'][Math.floor(Math.random()*4)] });
+}
+
+function openBolle(){
+  document.getElementById('menu').style.display  = 'none';
+  document.getElementById('win').style.display   = 'none';
+  document.getElementById('bolle').style.display = 'block';
+  initAudio();
+  setupBolle();
+  boLayout();
+  if (!boList.length) boSeed();
+  ensureBoLoop();
+}
+function setupBolle(){
+  if (boReady) return;
+  boCanvas = document.getElementById('bolleCanvas');
+  boCtx = boCanvas.getContext('2d');
+  boCanvas.addEventListener('pointerdown', boDown);
+  window.addEventListener('resize', boResize);
+  boReady = true;
+}
+function boLayout(){
+  const w = Math.min(window.innerWidth*0.94, 480);
+  const h = Math.min(window.innerHeight*0.60, 620);
+  boW = w; boH = h;
+  const dpr = window.devicePixelRatio || 1;
+  boCanvas.style.width  = w + 'px';
+  boCanvas.style.height = h + 'px';
+  boCanvas.width  = Math.round(w*dpr);
+  boCanvas.height = Math.round(h*dpr);
+  boCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function newBolla(sotto){
+  const r  = boW*(0.11 + Math.random()*0.06);         // bolle grandi: facili da centrare
+  const am = 5 + Math.random()*9;                     // ampiezza dell'ondeggiamento
+  const lo = r + am, hi = Math.max(lo, boW - r - am);
+  const bx = lo + Math.random()*(hi - lo);            // resta sempre dentro il riquadro
+  return {
+    bx: bx,
+    x:  bx,
+    y:  sotto ? boH + r + Math.random()*boH*0.6 : Math.random()*boH,
+    r:  r,
+    vy: -(0.28 + Math.random()*0.42),                 // salgono piano
+    ph: Math.random()*Math.PI*2,
+    am: am,
+    col: BO_COL[Math.floor(Math.random()*BO_COL.length)],
+    em:  BO_EMOJI[Math.floor(Math.random()*BO_EMOJI.length)]
+  };
+}
+function boSeed(){ boList = []; for (let i=0;i<7;i++) boList.push(newBolla(false)); }
+function bolleReset(){ boSeed(); boFx = []; playPop(600); ensureBoLoop(); }
+function boResize(){
+  const el = document.getElementById('bolle');
+  if (!el || el.style.display === 'none') return;
+  boLayout(); boSeed();
+}
+
+function boDown(e){
+  const rect = boCanvas.getBoundingClientRect();
+  const p = { x:e.clientX-rect.left, y:e.clientY-rect.top };
+  const mode = boKey();
+  if (mode === 'fuochi'){
+    boFirework(p.x, p.y); boLastAuto = nowMs();
+  } else if (mode === 'musica'){
+    boNota(p.x, p.y);
+  } else {
+    let hit = -1;
+    for (let i=boList.length-1;i>=0;i--){
+      const b = boList[i];
+      if (Math.hypot(p.x-b.x, p.y-b.y) <= b.r*1.15){ hit = i; break; }
+    }
+    if (hit >= 0){                                       // bolla scoppiata
+      const b = boList[hit];
+      boFx.push({ k:'pop', t0:nowMs(), life:850, x:b.x, y:b.y, r:b.r, col:b.col, em:b.em });
+      playPop(500 + Math.random()*400);
+      boList[hit] = newBolla(true);
+    } else {                                             // anche a vuoto succede qualcosa
+      boFx.push({ k:'rip', t0:nowMs(), life:520, x:p.x, y:p.y });
+      playPop(300 + Math.random()*120);
+    }
+  }
+  ensureBoLoop();
+  e.preventDefault();
+}
+
+function boDraw(){
+  const mode = boKey();
+  boCtx.clearRect(0,0,boW,boH);
+  boCtx.fillStyle = (mode === 'fuochi') ? '#2E2A3A' : '#FDFAF3';   // cielo scuro solo per i fuochi
+  boCtx.fillRect(0,0,boW,boH);
+
+  if (mode === 'musica'){                    // fasce colorate: in alto acuto, in basso grave
+    const n = BO_SCALA.length, bh = boH/n;
+    for (let i=0;i<n;i++){
+      const acceso = boFx.some(function(f){ return f.k === 'nota' && f.band === (n-1-i) && nowMs()-f.t0 < 260; });
+      boCtx.globalAlpha = acceso ? 0.95 : 0.45;
+      boCtx.fillStyle = BO_COL[i % BO_COL.length];
+      boCtx.fillRect(0, i*bh, boW, bh-2);
+    }
+    boCtx.globalAlpha = 1;
+  }
+  if (mode === 'bolle'){
+    for (const b of boList){
+      boCtx.save();
+      boCtx.globalAlpha = 0.95;
+      boCtx.fillStyle = b.col;
+      boCtx.beginPath(); boCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); boCtx.fill();
+      boCtx.globalAlpha = 0.55; boCtx.fillStyle = '#FFFFFF';
+      boCtx.beginPath(); boCtx.arc(b.x-b.r*0.32, b.y-b.r*0.34, b.r*0.22, 0, Math.PI*2); boCtx.fill();
+      boCtx.restore();
+      boCtx.font = (b.r*1.0) + 'px sans-serif';
+      boCtx.textAlign='center'; boCtx.textBaseline='middle';
+      boCtx.fillText(b.em, b.x, b.y);
+    }
+  }
+  // effetti
+  const now = nowMs();
+  for (const f of boFx){
+    const t = Math.min(1, (now-f.t0)/f.life);
+    boCtx.save();
+    if (f.k === 'pop'){
+      boCtx.globalAlpha = Math.max(0, 1-t);
+      boCtx.strokeStyle = f.col; boCtx.lineWidth = f.r*0.22;
+      boCtx.beginPath(); boCtx.arc(f.x, f.y, f.r*(1+t*0.9), 0, Math.PI*2); boCtx.stroke();
+      for (let i=0;i<8;i++){                         // schizzetti
+        const a = i*Math.PI/4, d = f.r*(0.9+t*1.1);
+        boCtx.beginPath();
+        boCtx.arc(f.x+Math.cos(a)*d, f.y+Math.sin(a)*d, f.r*0.10*(1-t), 0, Math.PI*2);
+        boCtx.fillStyle = f.col; boCtx.fill();
+      }
+      boCtx.globalAlpha = Math.max(0, 1-t*t);         // l'animaletto vola via
+      boCtx.font = (f.r*(1.0+t*0.9)) + 'px sans-serif';
+      boCtx.textAlign='center'; boCtx.textBaseline='middle';
+      boCtx.fillText(f.em, f.x, f.y - t*f.r*1.2);
+    } else if (f.k === 'fw'){                         // fuoco d'artificio
+      boCtx.globalAlpha = Math.max(0, 1-t*t);
+      boCtx.fillStyle = f.col;
+      for (const q of f.parts){
+        boCtx.beginPath(); boCtx.arc(q.x, q.y, q.r*(1-t*0.55), 0, Math.PI*2); boCtx.fill();
+      }
+    } else if (f.k === 'nota'){
+      boCtx.globalAlpha = Math.max(0, 0.8*(1-t));
+      boCtx.strokeStyle = '#FFFFFF'; boCtx.lineWidth = 4;
+      boCtx.beginPath(); boCtx.arc(f.x, f.y, 14+t*70, 0, Math.PI*2); boCtx.stroke();
+      boCtx.globalAlpha = Math.max(0, 1-t*t);
+      boCtx.font = (boW*0.10) + 'px sans-serif';
+      boCtx.textAlign='center'; boCtx.textBaseline='middle';
+      boCtx.fillText(f.em, f.x, f.y - t*boH*0.12);
+    } else {
+      boCtx.globalAlpha = Math.max(0, 0.55*(1-t));
+      boCtx.strokeStyle = '#D8AE50'; boCtx.lineWidth = 3;
+      boCtx.beginPath(); boCtx.arc(f.x, f.y, 10+t*46, 0, Math.PI*2); boCtx.stroke();
+    }
+    boCtx.restore();
+  }
+}
+function boTick(){
+  boRaf = null;
+  const el = document.getElementById('bolle');
+  if (!el || el.style.display === 'none') return;     // fuori dal gioco si ferma
+  boT++;
+  const mode = boKey();
+  if (mode === 'bolle'){
+    for (const b of boList){
+      b.y += b.vy;
+      b.x  = b.bx + Math.sin(boT*0.02 + b.ph)*b.am;
+      if (b.y + b.r < -8) Object.assign(b, newBolla(true));   // risale sempre una bolla nuova
+    }
+  }
+  const now = nowMs();
+  if (mode === 'fuochi' && now - boLastAuto > 2600){   // qualche fuoco parte da solo
+    boLastAuto = now;
+    boFirework(boW*(0.2+Math.random()*0.6), boH*(0.2+Math.random()*0.5));
+  }
+  for (const f of boFx){                              // particelle dei fuochi
+    if (f.k === 'fw'){
+      for (const q of f.parts){ q.x += q.vx; q.y += q.vy; q.vy += 0.045; q.vx *= 0.99; }
+    }
+  }
+  boFx = boFx.filter(function(f){ return now - f.t0 < f.life; });
+  boDraw();
+  boRaf = requestAnimationFrame(boTick);
+}
+function ensureBoLoop(){ if (boRaf === null) boRaf = requestAnimationFrame(boTick); }
+
+/* ================= RICALCA (senza livelli: le figure si susseguono da sole) ================= */
+function trLine(x1,y1,x2,y2){ return [[x1,y1],[x2,y2]]; }
+function trArc(cx,cy,r,a0,a1,n){ const p=[]; for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*i/n; p.push([cx+r*Math.cos(a), cy+r*Math.sin(a)]); } return p; }
+/* arco ellittico: serve per le pance di B, P, R, che devono essere più larghe che alte */
+function trEll(cx,cy,rx,ry,a0,a1,n){ const p=[]; for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*i/n; p.push([cx+rx*Math.cos(a), cy+ry*Math.sin(a)]); } return p; }
+function trWave(){ const p=[]; for(let i=0;i<=44;i++){ const t=i/44; p.push([0.10+0.80*t, 0.5+0.22*Math.sin(t*Math.PI*4)]); } return p; }
+function trSpiral(){ const p=[]; const n=100; for(let i=0;i<=n;i++){ const t=i/n; const a=-Math.PI/2 + t*2.4*Math.PI*2; const r=0.05+t*0.32; p.push([0.5+r*Math.cos(a), 0.5+r*Math.sin(a)]); } return p; }
+
+/* ordine dei tratti secondo la sequenza di prescrittura: verticale, orizzontale,
+   cerchio, croce, quadrato, diagonale, ics, triangolo, poi tratti più liberi */
+/* ---- 3 anni: forme e tratti di prescrittura ---- */
+const TRACE_FORME = [
+  { name:'La pioggia',  emoji:'🌧️', strokes:[ trLine(0.5,0.10,0.5,0.90) ] },
+  { name:'Il treno',    emoji:'🚂', strokes:[ trLine(0.10,0.5,0.90,0.5) ] },
+  { name:'Il sole',     emoji:'☀️', strokes:[ trArc(0.5,0.5,0.35,-Math.PI/2,-Math.PI/2-2*Math.PI,52) ] },
+  { name:'La croce',    emoji:'➕', strokes:[ trLine(0.5,0.12,0.5,0.88), trLine(0.12,0.5,0.88,0.5) ] },
+  { name:'La casa',     emoji:'🏠', strokes:[ [[0.15,0.15],[0.85,0.15],[0.85,0.85],[0.15,0.85],[0.15,0.15]] ] },
+  { name:'La discesa',  emoji:'🛷', strokes:[ trLine(0.15,0.15,0.85,0.85) ] },
+  { name:'La ics',      emoji:'✖️', strokes:[ trLine(0.15,0.15,0.85,0.85), trLine(0.85,0.15,0.15,0.85) ] },
+  { name:'La montagna', emoji:'⛰️', strokes:[ [[0.5,0.12],[0.88,0.85],[0.12,0.85],[0.5,0.12]] ] },
+  { name:'Il fulmine',  emoji:'⚡', strokes:[ [[0.12,0.28],[0.38,0.72],[0.62,0.28],[0.88,0.72]] ] },
+  { name:'Il mare',     emoji:'🌊', strokes:[ trWave() ] },
+  { name:'La lumaca',   emoji:'🐌', strokes:[ trSpiral() ] },
+  { name:'La scala',    emoji:'🪜', strokes:[ [[0.12,0.85],[0.12,0.62],[0.38,0.62],[0.38,0.42],[0.64,0.42],[0.64,0.22],[0.90,0.22]] ] }
+];
+
+/* ---- 6 anni: alfabeto italiano in stampatello maiuscolo (21 lettere),
+        tratti nell'ordine e nel verso corretti per la scrittura ---- */
+function L(name, strokes){ return { name:name, emoji:name, strokes:strokes }; }
+const TRACE_LETTERE = [
+  L('A', [ [[0.50,0.12],[0.30,0.88]], [[0.50,0.12],[0.70,0.88]], [[0.37,0.62],[0.63,0.62]] ]),
+  L('B', [ [[0.34,0.12],[0.34,0.88]], trEll(0.34,0.31,0.26,0.19,-Math.PI/2,Math.PI/2,20), trEll(0.34,0.69,0.30,0.19,-Math.PI/2,Math.PI/2,20) ]),
+  L('C', [ trArc(0.50,0.50,0.32,-0.9,-(2*Math.PI-0.9),34) ]),
+  L('D', [ [[0.34,0.12],[0.34,0.88]], trArc(0.34,0.50,0.38,-Math.PI/2,Math.PI/2,22) ]),
+  L('E', [ [[0.34,0.12],[0.34,0.88]], [[0.34,0.12],[0.68,0.12]], [[0.34,0.50],[0.62,0.50]], [[0.34,0.88],[0.68,0.88]] ]),
+  L('F', [ [[0.34,0.12],[0.34,0.88]], [[0.34,0.12],[0.68,0.12]], [[0.34,0.50],[0.62,0.50]] ]),
+  L('G', [ trArc(0.50,0.50,0.32,-0.9,-(2*Math.PI-0.9),34), [[0.70,0.75],[0.70,0.52],[0.52,0.52]] ]),
+  L('H', [ [[0.32,0.12],[0.32,0.88]], [[0.68,0.12],[0.68,0.88]], [[0.32,0.50],[0.68,0.50]] ]),
+  L('I', [ [[0.50,0.12],[0.50,0.88]] ]),
+  L('L', [ [[0.36,0.12],[0.36,0.88],[0.68,0.88]] ]),
+  L('M', [ [[0.30,0.12],[0.30,0.88]], [[0.30,0.12],[0.50,0.56],[0.70,0.12]], [[0.70,0.12],[0.70,0.88]] ]),
+  L('N', [ [[0.32,0.12],[0.32,0.88]], [[0.32,0.12],[0.68,0.88]], [[0.68,0.12],[0.68,0.88]] ]),
+  L('O', [ trArc(0.50,0.50,0.33,-Math.PI/2,-Math.PI/2-2*Math.PI,40) ]),
+  L('P', [ [[0.34,0.12],[0.34,0.88]], trEll(0.34,0.31,0.30,0.19,-Math.PI/2,Math.PI/2,20) ]),
+  L('Q', [ trArc(0.50,0.50,0.33,-Math.PI/2,-Math.PI/2-2*Math.PI,40), [[0.60,0.66],[0.78,0.88]] ]),
+  L('R', [ [[0.34,0.12],[0.34,0.88]], trEll(0.34,0.31,0.28,0.19,-Math.PI/2,Math.PI/2,20), [[0.34,0.50],[0.70,0.88]] ]),
+  L('S', [ [[0.68,0.24],[0.58,0.14],[0.44,0.13],[0.34,0.22],[0.35,0.36],[0.50,0.45],[0.62,0.53],[0.67,0.66],[0.60,0.81],[0.45,0.87],[0.32,0.80]] ]),
+  L('T', [ [[0.30,0.12],[0.70,0.12]], [[0.50,0.12],[0.50,0.88]] ]),
+  L('U', [ [[0.32,0.12],[0.32,0.60]].concat(trArc(0.50,0.60,0.18,Math.PI,0,16)).concat([[0.68,0.12]]) ]),
+  L('V', [ [[0.32,0.12],[0.50,0.88],[0.68,0.12]] ]),
+  L('Z', [ [[0.32,0.12],[0.68,0.12],[0.32,0.88],[0.68,0.88]] ])
+];
+
+/* ---- dopo l'alfabeto: parole da ricalcare, una lettera alla volta ---- */
+const TRACE_PAROLE_IT = [
+  { w:'APE',  em:'🐝' }, { w:'UVA',  em:'🍇' }, { w:'OCA',  em:'🦆' }, { w:'BUE',  em:'🐂' },
+  { w:'ORO',  em:'🥇' }, { w:'AGO',  em:'🪡' }, { w:'DUE',  em:'2️⃣' }, { w:'TRE',  em:'3️⃣' },
+  { w:'CASA', em:'🏠' }, { w:'LUNA', em:'🌙' }, { w:'SOLE', em:'☀️' }, { w:'MELA', em:'🍎' },
+  { w:'CANE', em:'🐕' }, { w:'MARE', em:'🌊' }, { w:'PANE', em:'🍞' }, { w:'ROSA', em:'🌹' },
+  { w:'RANA', em:'🐸' }, { w:'NAVE', em:'🚢' }, { w:'UOVO', em:'🥚' }, { w:'ORSO', em:'🐻' }
+];
+/* Parole inglesi: solo lettere presenti in TRACE_LETTERE (niente J,K,W,X,Y) */
+const TRACE_PAROLE_EN = [
+  { w:'BEE',  em:'🐝' }, { w:'SUN',  em:'☀️' }, { w:'CAT',  em:'🐱' }, { w:'DOG',  em:'🐕' },
+  { w:'EGG',  em:'🥚' }, { w:'ANT',  em:'🐜' }, { w:'CAR',  em:'🚗' }, { w:'BUS',  em:'🚌' },
+  { w:'MOON', em:'🌙' }, { w:'STAR', em:'⭐' }, { w:'FISH', em:'🐟' }, { w:'TREE', em:'🌳' },
+  { w:'BIRD', em:'🐦' }, { w:'FROG', em:'🐸' }, { w:'SHIP', em:'🚢' }, { w:'BEAR', em:'🐻' },
+  { w:'ROSE', em:'🌹' }, { w:'RAIN', em:'🌧️' }, { w:'CAKE', em:'🍰' }, { w:'LION', em:'🦁' }
+];
+let TRACE_PAROLE = TRACE_PAROLE_IT;   // commutato dall'area genitori in base alla lingua
+
+let TRSET = TRACE_FORME;   // insieme attivo (forme per 3 anni, lettere per 6 anni)
+let trModo = 'figure';     // 'figure' | 'lettere' | 'parole'
+let trParolaIdx = 0, trLetteraIdx = 0, trCelebEm = '';
+
+function trFiguraCorrente(){
+  if (trModo === 'parole'){
+    const p = TRACE_PAROLE[trParolaIdx];
+    const L = TRACE_LETTERE.find(function(x){ return x.name === p.w[trLetteraIdx]; });
+    return { name:p.w, emoji:p.w[trLetteraIdx], strokes:L.strokes };
+  }
+  return TRSET[trIdx];
+}
+function trEtichetta(){
+  const el = document.getElementById('traceName');
+  if (trModo === 'parole'){
+    const p = TRACE_PAROLE[trParolaIdx];
+    let h = '';
+    for (let i=0;i<p.w.length;i++){
+      const c = (i < trLetteraIdx) ? '#7BA05B' : (i === trLetteraIdx ? '#5E5142' : '#C9BDA9');
+      h += '<span style="color:' + c + '">' + p.w[i] + '</span>';
+    }
+    el.innerHTML = h + ' ' + p.em;
+  } else {
+    const t = trFiguraCorrente();
+    el.textContent = (t.name === t.emoji) ? t.name : (GB.trn(t.name) + ' ' + t.emoji);
+  }
+}
+
+let trCanvas=null, trCtx=null, trS=0, trTol=0, trStep=0;
+let trIdx=0, trStroke=0, trK=0, trPaths=[], trWp=[];
+let trDrawing=false, trCelebrate=0, trStickers=[], trReady=false, trRaf=null;
+let trPrev={ x:0, y:0 };
+
+function openRicalca(){                              // apre la scelta dell'età
+  document.getElementById('menu').style.display       = 'none';
+  document.getElementById('win').style.display        = 'none';
+  document.getElementById('traceStart').style.display = 'block';
+}
+function traceBack(){                                // dal gioco torna alla scelta dell'età
+  trDrawing = false;
+  document.getElementById('trace').style.display      = 'none';
+  document.getElementById('traceStart').style.display = 'block';
+}
+function startTrace(which){
+  TRSET = (which === 'lettere') ? TRACE_LETTERE : TRACE_FORME;
+  trModo = (which === 'lettere') ? 'lettere' : 'figure';
+  trIdx = 0; trParolaIdx = 0; trLetteraIdx = 0; trStickers = [];
+  trSuggerimento();
+  document.getElementById('traceStickers').textContent = '';
+  document.getElementById('traceStart').style.display = 'none';
+  document.getElementById('trace').style.display = 'block';
+  initAudio();
+  setupTrace();
+  trLayout(); buildTraceShape(); trDraw(); ensureTrLoop();
+}
+function setupTrace(){
+  if (trReady) return;
+  trCanvas = document.getElementById('traceCanvas');
+  trCtx = trCanvas.getContext('2d');
+  trCanvas.addEventListener('pointerdown', trDown);
+  trCanvas.addEventListener('pointermove', trMove);
+  trCanvas.addEventListener('pointerup',   trUp);
+  trCanvas.addEventListener('pointercancel', trUp);
+  window.addEventListener('resize', trResize);
+  trReady = true;
+}
+function trLayout(){
+  const w = Math.min(window.innerWidth*0.94, 440);
+  const h = Math.min(window.innerHeight*0.55, 440);
+  trS = Math.max(220, Math.min(w, h));
+  const dpr = window.devicePixelRatio || 1;
+  trCanvas.style.width  = trS + 'px';
+  trCanvas.style.height = trS + 'px';
+  trCanvas.width  = Math.round(trS*dpr);
+  trCanvas.height = Math.round(trS*dpr);
+  trCtx.setTransform(dpr,0,0,dpr,0,0);
+  trTol  = trS*0.085;        // tolleranza generosa: non serve precisione
+  trStep = trTol*0.85;
+}
+/* punti equidistanti lungo la linea guida */
+function resamplePx(pts, step){
+  const cum=[0];
+  for (let i=1;i<pts.length;i++) cum.push(cum[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]));
+  const total = cum[cum.length-1];
+  const n = Math.max(2, Math.round(total/step));
+  const out=[]; let seg=1;
+  for (let k=0;k<=n;k++){
+    const d = total*k/n;
+    while (seg < cum.length-1 && cum[seg] < d) seg++;
+    const a=pts[seg-1], b=pts[seg], segLen=cum[seg]-cum[seg-1];
+    const t = segLen>0 ? (d-cum[seg-1])/segLen : 0;
+    out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]);
+  }
+  return out;
+}
+function scaleShape(){
+  return trFiguraCorrente().strokes.map(function(st){
+    return st.map(function(p){ return [p[0]*trS, p[1]*trS]; });
+  });
+}
+function buildTraceShape(){
+  trPaths = scaleShape();
+  trStroke = 0; trK = 0; trCelebrate = 0;
+  trWp = resamplePx(trPaths[0], trStep);
+  trEtichetta();
+}
+function trResize(){
+  const el = document.getElementById('trace');
+  if (!el || el.style.display === 'none' || !trPaths.length) return;
+  const s = trStroke, k = trK;
+  trLayout();
+  trPaths = scaleShape();
+  trStroke = Math.min(s, trPaths.length-1);
+  trWp = resamplePx(trPaths[trStroke], trStep);
+  trK = Math.min(k, trWp.length);
+  trDraw();
+}
+
+function trArrowHead(x, y, ang, size, alpha){
+  trCtx.save();
+  trCtx.globalAlpha = alpha;
+  trCtx.translate(x, y); trCtx.rotate(ang);
+  trCtx.fillStyle = '#7BA05B';
+  trCtx.beginPath();
+  trCtx.moveTo(size, 0);
+  trCtx.lineTo(-size*0.60,  size*0.62);
+  trCtx.lineTo(-size*0.22,  0);
+  trCtx.lineTo(-size*0.60, -size*0.62);
+  trCtx.closePath(); trCtx.fill();
+  trCtx.restore();
+}
+function trPathLine(pts, from, to){
+  trCtx.beginPath();
+  trCtx.moveTo(pts[from][0], pts[from][1]);
+  for (let i=from+1;i<=to;i++) trCtx.lineTo(pts[i][0], pts[i][1]);
+  trCtx.stroke();
+}
+function trDraw(){
+  const sh = trFiguraCorrente();
+  trCtx.clearRect(0,0,trS,trS);
+  trCtx.fillStyle = '#FBF7EE'; trCtx.fillRect(0,0,trS,trS);
+  // figura in filigrana, per dare senso al tratto
+  trCtx.save();
+  trCtx.globalAlpha = 0.10;
+  trCtx.font = (trS*0.46) + 'px sans-serif';
+  trCtx.textAlign='center'; trCtx.textBaseline='middle';
+  trCtx.fillText(sh.emoji, trS/2, trS/2);
+  trCtx.restore();
+
+  trCtx.lineCap='round'; trCtx.lineJoin='round';
+  const guideW = trTol*1.5, doneW = trTol*1.05;
+  // linea guida di tutti i tratti
+  trCtx.strokeStyle = '#EBE1CD'; trCtx.lineWidth = guideW;
+  for (let s=0;s<trPaths.length;s++){ trPathLine(trPaths[s], 0, trPaths[s].length-1); }
+  // tratti già completati
+  trCtx.strokeStyle = '#9DBB8B'; trCtx.lineWidth = doneW;
+  for (let s=0;s<trStroke;s++){ trPathLine(trPaths[s], 0, trPaths[s].length-1); }
+  // porzione coperta del tratto in corso
+  if (trStroke < trPaths.length && trK > 0){
+    trCtx.strokeStyle = '#9DBB8B'; trCtx.lineWidth = doneW;
+    trPathLine(trWp, 0, Math.min(trK-1, trWp.length-1));
+  }
+  // pallino: dove mettere il dito adesso (verde all'inizio, oro mentre prosegue)
+  if (trStroke < trPaths.length && trCelebrate === 0){
+    const p = trWp[Math.min(trK, trWp.length-1)];
+    trCtx.fillStyle = (trK === 0) ? '#7BA05B' : '#D8AE50';
+    trCtx.beginPath(); trCtx.arc(p[0], p[1], trTol*0.45, 0, Math.PI*2); trCtx.fill();
+    // freccina lampeggiante: indica da che parte andare (serve su quadrato, cerchio, triangolo…)
+    if (trK === 0 && trWp.length > 1){
+      const q = trWp[Math.min(4, trWp.length-1)];
+      const ang = Math.atan2(q[1]-p[1], q[0]-p[0]);
+      const blink = 0.30 + 0.70*(0.5 + 0.5*Math.sin(nowMs()/180));
+      trArrowHead(p[0]+Math.cos(ang)*trTol*1.30, p[1]+Math.sin(ang)*trTol*1.30, ang, trTol*0.80, blink);
+    }
+  }
+  // festa breve a figura finita
+  if (trCelebrate > 0){
+    const t = Math.min(1, (nowMs()-trCelebrate)/900);
+    trCtx.save();
+    trCtx.globalAlpha = Math.max(0, 1-t);
+    trCtx.font = (trS*(0.30+0.14*t)) + 'px sans-serif';
+    trCtx.textAlign='center'; trCtx.textBaseline='middle';
+    trCtx.fillText(trCelebEm || sh.emoji, trS/2, trS/2);
+    trCtx.restore();
+  }
+}
+
+function trPos(e){ const r = trCanvas.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top }; }
+function trDown(e){ trDrawing = true; trPrev = trPos(e); ensureTrLoop(); e.preventDefault(); }   // toccare non basta: bisogna scorrere
+function trMove(e){ if (trDrawing) trCheck(trPos(e)); e.preventDefault(); }
+function trUp(e){ trDrawing = false; e.preventDefault(); }   // il progresso resta dov'era
+function trCheck(p){
+  if (trCelebrate > 0 || trStroke >= trPaths.length) return;
+  const jump = Math.hypot(p.x-trPrev.x, p.y-trPrev.y);
+  trPrev = { x:p.x, y:p.y };
+  if (jump > trTol*3) return;                       // dito che "salta": nessun avanzamento
+  const LOOK = 5;                                   // tollera il dito veloce
+  for (let j=trK; j<Math.min(trWp.length, trK+LOOK); j++){
+    if (Math.hypot(p.x-trWp[j][0], p.y-trWp[j][1]) <= trTol) trK = j+1;
+  }
+  if (trK >= trWp.length){
+    trStroke++;
+    if (trStroke < trPaths.length){                 // figura a più tratti
+      trWp = resamplePx(trPaths[trStroke], trStep); trK = 0; playPick();
+    } else {
+      traceComplete();
+    }
+  }
+}
+function traceComplete(){
+  trCelebrate = nowMs(); trDrawing = false;
+  const f = trFiguraCorrente();
+  let attesa = 950;
+  trCelebEm = f.emoji;
+  if (trModo === 'parole'){
+    const p = TRACE_PAROLE[trParolaIdx];
+    if (trLetteraIdx === p.w.length - 1){       // parola completata
+      trCelebEm = p.em; attesa = 1500;
+      playWin();
+      trStickers.push(p.em);
+    } else {
+      playMatch();                              // lettera fatta, si passa alla successiva
+      trEtichetta();
+    }
+  } else {
+    playMatch();
+    trStickers.push(f.emoji);
+  }
+  if (trStickers.length > 12) trStickers.shift();
+  document.getElementById('traceStickers').textContent = trStickers.join(' ');
+  setTimeout(traceNext, attesa);                // il pezzo successivo arriva da solo
+  ensureTrLoop();
+}
+function traceModo(){                          // il titolo passa da lettere singole a parole
+  if (trModo === 'figure') return;
+  trModo = (trModo === 'lettere') ? 'parole' : 'lettere';
+  if (trModo === 'parole'){ trParolaIdx = 0; trLetteraIdx = 0; } else { trIdx = 0; }
+  playPick();
+  trSuggerimento();
+  buildTraceShape();
+  trDraw();
+  ensureTrLoop();
+}
+function trSuggerimento(){
+  const h = document.getElementById('traceHint');
+  if (!h) return;
+  if (trModo === 'figure'){
+    h.textContent = GB.t('hintFigure');
+  } else if (trModo === 'lettere'){
+    h.textContent = GB.t('hintLetters');
+  } else {
+    h.textContent = GB.t('hintWords');
+  }
+}
+function traceNext(){
+  if (trModo === 'parole'){
+    trLetteraIdx++;
+    if (trLetteraIdx >= TRACE_PAROLE[trParolaIdx].w.length){   // parola finita
+      trLetteraIdx = 0;
+      trParolaIdx = (trParolaIdx + 1) % TRACE_PAROLE.length;
+    }
+  } else {
+    trIdx = (trIdx+1) % TRSET.length;          // figure e lettere: ciclo infinito
+  }
+  buildTraceShape();
+  trDraw();
+  ensureTrLoop();                              // riparte il lampeggio della freccina
+}
+function traceSkip(){                                 // 🔀 = un'altra a caso, diversa da questa
+  if (trCelebrate > 0) return;
+  playPick();
+  if (trModo === 'parole'){
+    let n = trParolaIdx;
+    while (n === trParolaIdx && TRACE_PAROLE.length > 1) n = Math.floor(Math.random()*TRACE_PAROLE.length);
+    trParolaIdx = n; trLetteraIdx = 0;
+  } else if (TRSET.length > 1){
+    let n = trIdx;
+    while (n === trIdx) n = Math.floor(Math.random()*TRSET.length);
+    trIdx = n;
+  }
+  buildTraceShape();
+  trDraw();
+  ensureTrLoop();
+}
+function trVisible(){ const el = document.getElementById('trace'); return !!el && el.style.display !== 'none'; }
+function trIdle(){ return trStroke < trPaths.length && trK === 0 && trCelebrate === 0; }   // freccina che lampeggia
+function trTick(){
+  trRaf = null;
+  if (!trVisible()) return;                        // fuori dal gioco l'animazione si ferma
+  trDraw();
+  if (trDrawing || trCelebrate > 0 || trIdle()) trRaf = requestAnimationFrame(trTick);
+}
+function ensureTrLoop(){ if (trRaf === null) trRaf = requestAnimationFrame(trTick); }
+
+/* ================= STAMPINI ================= */
+const STAMPS = ['⭐','🌈','🌸','🌼','🦋','🐞','🐠','🐢','🐱','🐶','🌷','🍓','🎈','❤️','🚗','🌞'];
+const STAMP_BG = '#FFFDF8';
+let stampIndex = 0, stampMode = 'stamp';
+let stCanvas = null, stCtx = null;
+let stW = 0, stH = 0, stampSize = 0, eraserR = 0;
+let stDrawing = false, stLast = { x:0, y:0 }, stReady = false;
+
+function openStampini(){
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('stamp').style.display = 'block';
+  initAudio();
+  setupStamp();            // dimensiona una sola volta: i disegni restano tra una visita e l'altra
+  stampUpdateUI();
+}
+function setupStamp(){
+  if (stReady) return;
+  stCanvas = document.getElementById('stampCanvas');
+  stCtx = stCanvas.getContext('2d');
+  stLayout();
+  stampFillBg();
+  stCanvas.addEventListener('pointerdown', stDown);
+  stCanvas.addEventListener('pointermove', stMove);
+  stCanvas.addEventListener('pointerup',   stUp);
+  stCanvas.addEventListener('pointercancel', stUp);
+  stReady = true;
+}
+function stLayout(){
+  const w = Math.min(window.innerWidth*0.94, 560);
+  const h = Math.min(window.innerHeight*0.58, 620);
+  stW = w; stH = h;
+  const dpr = window.devicePixelRatio || 1;
+  stCanvas.style.width  = w + 'px';
+  stCanvas.style.height = h + 'px';
+  stCanvas.width  = Math.round(w*dpr);
+  stCanvas.height = Math.round(h*dpr);
+  stCtx.setTransform(dpr,0,0,dpr,0,0);
+  stampSize = Math.min(w, h)*0.13;
+  eraserR   = stampSize*0.75;
+}
+function stampFillBg(){ stCtx.fillStyle = STAMP_BG; stCtx.fillRect(0,0,stW,stH); }
+function stampClear(){ stampFillBg(); }
+
+function placeStamp(x, y){
+  stCtx.save();
+  stCtx.translate(x, y);
+  stCtx.rotate((Math.random()-0.5)*0.4);      // leggera rotazione: sembra timbrato
+  stCtx.font = stampSize + 'px sans-serif';
+  stCtx.textAlign = 'center'; stCtx.textBaseline = 'middle';
+  stCtx.fillText(STAMPS[stampIndex], 0, 0);
+  stCtx.restore();
+}
+function eraseAt(x, y){
+  stCtx.fillStyle = STAMP_BG;
+  stCtx.beginPath(); stCtx.arc(x, y, eraserR, 0, Math.PI*2); stCtx.fill();
+}
+let lastDrawSnd = 0;
+function stApply(p){
+  if (stampMode === 'eraser'){ eraseAt(p.x, p.y); } else { placeStamp(p.x, p.y); }
+  const t = nowMs();
+  if (t - lastDrawSnd > 45){ lastDrawSnd = t; if (stampMode === 'eraser') playErase(); else playStamp(); }
+}
+
+function stPos(e){ const r = stCanvas.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top }; }
+function stDown(e){
+  stDrawing = true;
+  const p = stPos(e); stApply(p); stLast = p;
+  try { stCanvas.setPointerCapture(e.pointerId); } catch(_){}
+  e.preventDefault();
+}
+function stMove(e){
+  if (!stDrawing) return;
+  const p = stPos(e);
+  const step = (stampMode === 'eraser') ? eraserR*0.5 : stampSize*0.95;   // scia di stampini / gomma continua
+  if (Math.hypot(p.x-stLast.x, p.y-stLast.y) >= step){ stApply(p); stLast = p; }
+  e.preventDefault();
+}
+function stUp(e){
+  if (stDrawing){ stDrawing = false; try { stCanvas.releasePointerCapture(e.pointerId); } catch(_){} }
+  e.preventDefault();
+}
+
+function stampUpdateUI(){
+  document.getElementById('stampGlyph').textContent = STAMPS[stampIndex];
+  document.getElementById('stampBtn').classList.toggle('active', stampMode === 'stamp');
+  document.getElementById('eraserBtn').classList.toggle('active', stampMode === 'eraser');
+}
+function stampCycle(){ stampIndex = (stampIndex+1) % STAMPS.length; stampMode = 'stamp'; playPick(); stampUpdateUI(); }   // cambia stampino a ogni tocco
+function stampEraser(){ stampMode = 'eraser'; playPick(); stampUpdateUI(); }
+
+/* ================= ABBINAMENTI ================= */
+/* Ogni livello ha una riserva di 8 coppie: a ogni partita se ne pescano 4,
+   così lo stesso livello non è mai identico. */
+const ABB = [
+  { title:'Unisci i colori uguali', pool:[
+    {a:'🔴',b:'🔴'},{a:'🟡',b:'🟡'},{a:'🟢',b:'🟢'},{a:'🟠',b:'🟠'},
+    {a:'🟣',b:'🟣'},{a:'🟤',b:'🟤'},{a:'⚫',b:'⚫'},{a:'⚪',b:'⚪'} ] },
+  { title:'Unisci ogni cosa al suo colore', pool:[
+    {a:'🍓',b:'🔴'},{a:'🍋',b:'🟡'},{a:'🥑',b:'🟢'},{a:'🍊',b:'🟠'},
+    {a:'🍆',b:'🟣'},{a:'🌰',b:'🟤'},{a:'🐧',b:'⚫'},{a:'🥚',b:'⚪'} ] },
+  { title:'Unisci ogni cosa alla sua forma', pool:[
+    {a:'⚽',b:'⚪'},{a:'📺',b:'⬜'},{a:'🍕',b:'🔺'},{a:'🪁',b:'🔶'},
+    {a:'🕐',b:'⚪'},{a:'🪟',b:'⬜'},{a:'⛰️',b:'🔺'},{a:'💎',b:'🔶'} ] },
+  { title:'Unisci le cose che stanno insieme', pool:[
+    {a:'🧦',b:'👟'},{a:'🔑',b:'🔒'},{a:'🪥',b:'🦷'},{a:'✏️',b:'📄'},
+    {a:'🧵',b:'🪡'},{a:'☕',b:'🥐'},{a:'🔨',b:'🪵'},{a:'🌂',b:'👢'} ] },
+  { title:'Unisci ogni mezzo a dove va', pool:[
+    {a:'🚗',b:'🛣️'},{a:'⛵',b:'🌊'},{a:'✈️',b:'☁️'},{a:'🚂',b:'🛤️'},
+    {a:'🚜',b:'🌾'},{a:'🚀',b:'🌙'},{a:'🚲',b:'🏞️'},{a:'🛷',b:'🏔️'} ] },
+  { title:'Unisci ogni animale a ciò che dà', pool:[
+    {a:'🐔',b:'🥚'},{a:'🐄',b:'🥛'},{a:'🐝',b:'🍯'},{a:'🐑',b:'🧶'},
+    {a:'🌳',b:'🍎'},{a:'🌾',b:'🍞'},{a:'🐛',b:'🦋'},{a:'🌻',b:'🌰'} ] },
+  { title:'Unisci ogni cosa al momento giusto', pool:[
+    {a:'☂️',b:'🌧️'},{a:'⛄',b:'❄️'},{a:'🕶️',b:'☀️'},{a:'🩱',b:'🏖️'},
+    {a:'🧤',b:'🥶'},{a:'🍦',b:'🥵'},{a:'🎂',b:'🎉'},{a:'🌜',b:'🛏️'} ] },
+  { title:'Unisci i contrari', pool:[
+    {a:'☀️',b:'🌙'},{a:'🔥',b:'❄️'},{a:'😀',b:'😢'},{a:'🐘',b:'🐭'},
+    {a:'⬆️',b:'⬇️'},{a:'🐢',b:'🐇'},{a:'👴',b:'👶'},{a:'🔊',b:'🔇'} ] },
+  { title:'Unisci ogni cosa a da dove viene', pool:[
+    {a:'🍞',b:'🌾'},{a:'🍟',b:'🥔'},{a:'🧀',b:'🥛'},{a:'🍎',b:'🌳'},
+    {a:'🍿',b:'🌽'},{a:'🧂',b:'🌊'},{a:'📄',b:'🪵'},{a:'🍳',b:'🥚'} ] },
+  { title:'Unisci ciò che viene dopo', pool:[
+    {a:'🥚',b:'🐣'},{a:'🌱',b:'🌳'},{a:'🌧️',b:'🌈'},{a:'🧊',b:'💧'},
+    {a:'🐛',b:'🦋'},{a:'🌰',b:'🌳'},{a:'🐤',b:'🐔'},{a:'🌑',b:'🌕'} ] }
+];
+let abbLevel = 0, abbPairs = [], abbRightOrder = [];
+let abbMatched = null, abbSel = null, abbDragging = false;
+let abbFinger = { x:0, y:0 }, abbWrong = null;
+let abbCanvas = null, abbCtx = null;
+let abbW = 0, abbH = 0, abbLeftX = 0, abbRightX = 0, abbRowH = 0, abbTileR = 0, abbHitR = 0;
+let abbRaf = null, abbReady = false;
+
+function nowMs(){ return (typeof performance !== 'undefined') ? performance.now() : Date.now(); }
+
+function openAbbinamenti(){
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('win').style.display  = 'none';
+  document.getElementById('abb').style.display  = 'block';
+  initAudio();
+  setupAbb();
+  abbLevel = 0;
+  initAbbLevel();
+}
+function setupAbb(){
+  if (abbReady) return;
+  abbCanvas = document.getElementById('abbCanvas');
+  abbCtx = abbCanvas.getContext('2d');
+  abbCanvas.addEventListener('pointerdown', abbDown);
+  abbCanvas.addEventListener('pointermove', abbMove);
+  abbCanvas.addEventListener('pointerup',   abbUp);
+  abbCanvas.addEventListener('pointercancel', abbUp);
+  window.addEventListener('resize', abbResize);
+  abbReady = true;
+}
+function layoutAbb(){
+  const w = Math.min(window.innerWidth*0.92, 440);
+  const rows = abbPairs.length;
+  abbTileR = w*0.11;
+  abbRowH  = abbTileR*2.35;
+  abbW = w; abbH = abbRowH*rows;
+  const dpr = window.devicePixelRatio || 1;
+  abbCanvas.style.width  = w + 'px';
+  abbCanvas.style.height = abbH + 'px';
+  abbCanvas.width  = Math.round(w*dpr);
+  abbCanvas.height = Math.round(abbH*dpr);
+  abbCtx.setTransform(dpr,0,0,dpr,0,0);
+  abbLeftX = w*0.20; abbRightX = w*0.80;
+  abbHitR = abbTileR*1.2;
+}
+function leftC(i){  return { x:abbLeftX,  y:abbRowH*(i+0.5) }; }
+function rightC(j){ return { x:abbRightX, y:abbRowH*(j+0.5) }; }
+
+function initAbbLevel(){
+  const cfg = ABB[abbLevel];
+  // pesca 4 coppie dalla riserva, senza figure ripetute né a sinistra né a destra
+  const riserva = cfg.pool.slice();
+  shuffle(riserva);
+  const usateA = {}, usateB = {};
+  abbPairs = [];
+  for (let k=0; k<riserva.length && abbPairs.length<4; k++){
+    const c = riserva[k];
+    if (usateA[c.a] || usateB[c.b]) continue;
+    usateA[c.a] = 1; usateB[c.b] = 1;
+    abbPairs.push(c);
+  }
+  const n = abbPairs.length;
+  abbRightOrder = [];
+  for (let i=0;i<n;i++) abbRightOrder.push(i);
+  shuffle(abbRightOrder);
+  let same = true;
+  for (let i=0;i<n;i++){ if (abbRightOrder[i] !== i){ same = false; break; } }
+  if (same && n > 1){ const t = abbRightOrder[0]; abbRightOrder[0] = abbRightOrder[1]; abbRightOrder[1] = t; }
+  abbMatched = new Set(); abbSel = null; abbDragging = false; abbWrong = null;
+  layoutAbb();
+  document.getElementById('abbFound').textContent = '0';
+  document.getElementById('abbTotal').textContent = n;
+  document.getElementById('abbTitle').textContent = GB.lvl(abbLevel+1, ABB.length) + ' · ' + GB.trn(cfg.title);
+  drawAbb();
+}
+function restartAbbLevel(){
+  abbMatched = new Set(); abbSel = null; abbDragging = false; abbWrong = null;
+  document.getElementById('abbFound').textContent = '0';
+  drawAbb();
+}
+
+function abbDisc(x, y, emoji, ring){
+  abbCtx.fillStyle = '#FFFDF8';
+  abbCtx.beginPath(); abbCtx.arc(x, y, abbTileR, 0, Math.PI*2); abbCtx.fill();
+  abbCtx.strokeStyle = ring || '#EFE6D5';
+  abbCtx.lineWidth = ring ? 4 : 2;
+  abbCtx.beginPath(); abbCtx.arc(x, y, abbTileR, 0, Math.PI*2); abbCtx.stroke();
+  abbCtx.font = (abbTileR*1.15) + 'px sans-serif';
+  abbCtx.textAlign = 'center'; abbCtx.textBaseline = 'middle';
+  abbCtx.fillStyle = '#5E5142';
+  abbCtx.fillText(emoji, x, y);
+}
+function drawAbb(){
+  abbCtx.clearRect(0,0,abbW,abbH);
+  abbCtx.fillStyle = '#FBF7EE';
+  abbCtx.fillRect(0,0,abbW,abbH);
+  const now = nowMs();
+  const wrongOn = abbWrong && now < abbWrong.until;
+  if (abbWrong && now >= abbWrong.until) abbWrong = null;
+  // linee già abbinate (verde)
+  abbCtx.lineWidth = Math.max(4, abbTileR*0.14); abbCtx.lineCap = 'round';
+  abbMatched.forEach(function(pid){
+    let j = -1; for (let k=0;k<abbRightOrder.length;k++){ if (abbRightOrder[k] === pid){ j = k; break; } }
+    const L = leftC(pid), R = rightC(j);
+    abbCtx.strokeStyle = 'rgba(123,160,91,.85)';
+    abbCtx.beginPath(); abbCtx.moveTo(L.x, L.y); abbCtx.lineTo(R.x, R.y); abbCtx.stroke();
+  });
+  // linea in trascinamento (oro tratteggiato)
+  if (abbDragging && abbSel){
+    const S = (abbSel.side === 'L') ? leftC(abbSel.slot) : rightC(abbSel.slot);
+    abbCtx.strokeStyle = 'rgba(216,174,80,.9)'; abbCtx.setLineDash([8,6]);
+    abbCtx.beginPath(); abbCtx.moveTo(S.x, S.y); abbCtx.lineTo(abbFinger.x, abbFinger.y); abbCtx.stroke();
+    abbCtx.setLineDash([]);
+  }
+  // tessere di sinistra
+  for (let i=0;i<abbPairs.length;i++){
+    let ring = null;
+    if (abbMatched.has(i)) ring = '#7BA05B';
+    else if (abbSel && abbSel.side === 'L' && abbSel.slot === i) ring = '#D8AE50';
+    if (wrongOn && abbWrong.l === i) ring = '#D9776A';
+    const c = leftC(i); abbDisc(c.x, c.y, abbPairs[i].a, ring);
+  }
+  // tessere di destra
+  for (let j=0;j<abbPairs.length;j++){
+    const pid = abbRightOrder[j];
+    let ring = null;
+    if (abbMatched.has(pid)) ring = '#7BA05B';
+    else if (abbSel && abbSel.side === 'R' && abbSel.slot === j) ring = '#D8AE50';
+    if (wrongOn && abbWrong.r === j) ring = '#D9776A';
+    const c = rightC(j); abbDisc(c.x, c.y, abbPairs[pid].b, ring);
+  }
+}
+
+function abbPos(e){
+  const rect = abbCanvas.getBoundingClientRect();
+  return { x:e.clientX-rect.left, y:e.clientY-rect.top };
+}
+// individua l'oggetto (di una delle due colonne) sotto il dito, entro il raggio di presa
+function abbHitAny(p){
+  for (let i=0;i<abbPairs.length;i++){
+    if (abbMatched.has(i)) continue;
+    const c = leftC(i);
+    if (Math.hypot(p.x-c.x, p.y-c.y) <= abbHitR) return { side:'L', slot:i };
+  }
+  for (let j=0;j<abbPairs.length;j++){
+    if (abbMatched.has(abbRightOrder[j])) continue;
+    const c = rightC(j);
+    if (Math.hypot(p.x-c.x, p.y-c.y) <= abbHitR) return { side:'R', slot:j };
+  }
+  return null;
+}
+// slot corretto nella colonna opposta per l'oggetto selezionato
+function abbCorrectTarget(){
+  if (!abbSel) return null;
+  if (abbSel.side === 'L'){
+    for (let j=0;j<abbRightOrder.length;j++){ if (abbRightOrder[j] === abbSel.slot) return { side:'R', slot:j }; }
+    return null;
+  }
+  return { side:'L', slot: abbRightOrder[abbSel.slot] };
+}
+function abbTargetCenter(t){ return (t.side === 'L') ? leftC(t.slot) : rightC(t.slot); }
+function abbConnect(a, b){
+  const leftSlot  = (a.side === 'L') ? a.slot : b.slot;
+  const rightSlot = (a.side === 'R') ? a.slot : b.slot;
+  abbTryMatch(leftSlot, rightSlot);
+}
+function abbTryMatch(leftSlot, rightSlot){
+  if (abbRightOrder[rightSlot] === leftSlot){        // giusto
+    abbMatched.add(leftSlot);
+    abbSel = null; abbDragging = false;
+    playMatch();
+    document.getElementById('abbFound').textContent = abbMatched.size;
+    drawAbb();
+    if (abbMatched.size === abbPairs.length) setTimeout(abbWin, 350);
+  } else {                                            // sbagliato
+    abbWrong = { l:leftSlot, r:rightSlot, until: nowMs()+550 };
+    abbSel = null; abbDragging = false;
+    playNoMatch();
+    ensureLoopAbb();
+  }
+}
+function abbDown(e){
+  const p = abbPos(e);
+  const hit = abbHitAny(p);
+  if (hit){
+    if (abbSel && hit.side !== abbSel.side){ abbConnect(abbSel, hit); }   // due tocchi, in qualsiasi verso
+    else { abbSel = hit; abbDragging = true; abbFinger = p; playPick(); ensureLoopAbb(); }
+  } else {
+    abbSel = null; drawAbb();
+  }
+  e.preventDefault();
+}
+function abbMove(e){
+  if (abbDragging && abbSel){
+    abbFinger = abbPos(e);
+    const t = abbCorrectTarget();          // appena il dito arriva su quello GIUSTO, collega da solo
+    if (t){
+      const c = abbTargetCenter(t);
+      if (Math.hypot(abbFinger.x-c.x, abbFinger.y-c.y) <= abbTileR*1.4){ abbConnect(abbSel, t); }
+    }
+  }
+  e.preventDefault();
+}
+function abbUp(e){
+  if (abbDragging){
+    abbDragging = false;
+    const t = abbCorrectTarget();          // rilascio proprio sul giusto: collega comunque
+    if (t && abbSel){
+      const c = abbTargetCenter(t), p = abbPos(e);
+      if (Math.hypot(p.x-c.x, p.y-c.y) <= abbTileR*1.4){ abbConnect(abbSel, t); }
+      else { ensureLoopAbb(); }             // altrimenti mantiene la selezione, nessun errore
+    } else { ensureLoopAbb(); }
+  }
+  e.preventDefault();
+}
+function abbResize(){
+  const a = document.getElementById('abb');
+  if (!a || a.style.display === 'none' || !abbPairs.length) return;
+  layoutAbb(); drawAbb();
+}
+function abbTick(){
+  abbRaf = null;
+  drawAbb();
+  const now = nowMs();
+  if (abbDragging || (abbWrong && now < abbWrong.until)) abbRaf = requestAnimationFrame(abbTick);
+}
+function ensureLoopAbb(){ if (abbRaf === null) abbRaf = requestAnimationFrame(abbTick); }
+
+function abbWin(){
+  playWin(); confetti();
+  const isLast = abbLevel >= ABB.length-1;
+  document.getElementById('winStar').textContent = isLast ? '🏆' : '🎉';
+  document.getElementById('winNext').onclick = isLast ? restartAbbGame : nextAbbLevel;
+  document.getElementById('winBack').onclick = goToMenu;
+  document.getElementById('win').style.display = 'flex';
+}
+function nextAbbLevel(){   abbLevel++;   document.getElementById('win').style.display='none'; initAbbLevel(); }
+function restartAbbGame(){ abbLevel = 0; document.getElementById('win').style.display='none'; initAbbLevel(); }
+
+/* ================= LABIRINTO ================= */
+const MAZES = [
+  { cells:5, char:'👨‍🚀', goal:'🌙', title:'Porta l\'astronauta sulla Luna 🚀 → 🌙' },
+  { cells:6, char:'🐰',   goal:'🥕', title:'Porta il coniglio alla carota 🐰 → 🥕' },
+  { cells:7, char:'🐝',   goal:'🌻', title:'Porta l\'ape al fiore 🐝 → 🌻' },
+  { cells:7, char:'🐿️',   goal:'🌰', title:'Porta lo scoiattolo alla nocciola 🐿️ → 🌰' },
+  { cells:8, char:'🐻',   goal:'🍯', title:'Porta l\'orsetto al miele 🐻 → 🍯' },
+  { cells:8, char:'🐧',   goal:'🐟', title:'Porta il pinguino al pesce 🐧 → 🐟' },
+  { cells:9, char:'🐭',   goal:'🧀', title:'Porta il topolino al formaggio 🐭 → 🧀' },
+  { cells:9, char:'🚒',   goal:'🔥', title:'Porta i pompieri al fuoco 🚒 → 🔥' }
+];
+let mazeLevel = 0;
+let maze = null;                     // { g, W, H, start, goal }
+let mzCanvas = null, mzCtx = null;
+let mzSize = 0, mzCorr = 0, mzWall = 0;    // lato canvas; larghezza corridoio; spessore parete (px)
+let mzOff = [], mzWid = [];                // offset e larghezza di ogni banda della griglia
+const MZ_WALL_RATIO = 0.34;               // parete = 34% del corridoio: pareti sottili, corridoi larghi
+let mzToken = { x:0, y:0 };
+let mzTarget = { x:0, y:0 };
+let mzDragging = false, mzWon = false;
+let mzTokenR = 0, mzGrabR = 0;
+let mzTrail = [];
+let mzRaf = null, mzReady = false;
+
+function openLabirinto(){
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('win').style.display  = 'none';
+  document.getElementById('maze').style.display = 'block';
+  initAudio();
+  setupMaze();
+  mazeLevel = 0;
+  initMazeLevel();
+}
+function setupMaze(){
+  if (mzReady) return;
+  mzCanvas = document.getElementById('mazeCanvas');
+  mzCtx = mzCanvas.getContext('2d');
+  mzCanvas.addEventListener('pointerdown', mzDown);
+  mzCanvas.addEventListener('pointermove', mzMove);
+  mzCanvas.addEventListener('pointerup',   mzUp);
+  mzCanvas.addEventListener('pointercancel', mzUp);
+  window.addEventListener('resize', mzResize);
+  mzReady = true;
+}
+
+/* generazione: recursive backtracker -> griglia di pareti (1) e percorsi (0) */
+function genMaze(cells){
+  const cols = cells, rows = cells;
+  const W = cols*2+1, H = rows*2+1;
+  const g = [];
+  for (let y=0;y<H;y++){ g.push(new Array(W).fill(1)); }
+  const seen = [];
+  for (let y=0;y<rows;y++){ seen.push(new Array(cols).fill(false)); }
+  function carve(c, r){
+    seen[r][c] = true;
+    g[2*r+1][2*c+1] = 0;
+    const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+    shuffle(dirs);
+    for (let i=0;i<dirs.length;i++){
+      const dc = dirs[i][0], dr = dirs[i][1];
+      const nc = c+dc, nr = r+dr;
+      if (nc>=0 && nc<cols && nr>=0 && nr<rows && !seen[nr][nc]){
+        g[2*r+1+dr][2*c+1+dc] = 0;
+        carve(nc, nr);
+      }
+    }
+  }
+  carve(0,0);
+  return { g, W, H, start:{c:0,r:0}, goal:{c:cols-1,r:rows-1} };
+}
+
+function bandCenter(i){ return mzOff[i] + mzWid[i]/2; }
+function bandAt(p){
+  if (p <= 0) return 0;
+  for (let i=0;i<maze.W;i++){ if (p < mzOff[i] + mzWid[i]) return i; }
+  return maze.W-1;
+}
+function startPx(){ return { x:bandCenter(2*maze.start.c+1), y:bandCenter(2*maze.start.r+1) }; }
+function goalPx(){  return { x:bandCenter(2*maze.goal.c+1),  y:bandCenter(2*maze.goal.r+1) }; }
+
+function layoutMaze(isNew){
+  const oldSize = mzSize;
+  const css = Math.min(window.innerWidth*0.92, 460);
+  const dpr = window.devicePixelRatio || 1;
+  const cols = (maze.W-1)/2;                                  // numero di corridoi per lato
+  // corr*cols + wall*(cols+1) = css, con wall = corr*RATIO
+  mzCorr = css / (cols + (cols+1)*MZ_WALL_RATIO);
+  mzWall = mzCorr * MZ_WALL_RATIO;
+  mzWid = []; mzOff = [];
+  let acc = 0;
+  for (let i=0;i<maze.W;i++){
+    const w = (i % 2 === 1) ? mzCorr : mzWall;               // dispari = corridoio, pari = parete
+    mzWid.push(w); mzOff.push(acc); acc += w;
+  }
+  mzSize = acc;
+  mzCanvas.style.width  = mzSize + 'px';
+  mzCanvas.style.height = mzSize + 'px';
+  mzCanvas.width  = Math.round(mzSize*dpr);
+  mzCanvas.height = Math.round(mzSize*dpr);
+  mzCtx.setTransform(dpr,0,0,dpr,0,0);
+  mzTokenR = mzCorr*0.30;
+  mzGrabR  = Math.max(40, mzCorr*1.0);
+  if (isNew || oldSize === 0){
+    const s = startPx(); mzToken.x = s.x; mzToken.y = s.y;
+    mzTrail = [{x:mzToken.x, y:mzToken.y}];
+  } else {
+    const s = mzSize/oldSize;
+    mzToken.x *= s; mzToken.y *= s;
+    for (let i=0;i<mzTrail.length;i++){ mzTrail[i].x *= s; mzTrail[i].y *= s; }
+  }
+}
+
+function initMazeLevel(){
+  const cfg = MAZES[mazeLevel];
+  maze = genMaze(cfg.cells);
+  mzDragging = false; mzWon = false;
+  layoutMaze(true);
+  document.getElementById('mazeTag').textContent   = GB.lvl(mazeLevel+1, MAZES.length);
+  document.getElementById('mazeTitle').textContent = GB.trn(cfg.title);
+  drawMaze();
+}
+function restartMazeLevel(){        // ricomincia lo stesso labirinto dall'inizio
+  if (!maze) return;
+  mzDragging = false; mzWon = false;
+  const s = startPx(); mzToken.x = s.x; mzToken.y = s.y;
+  mzTrail = [{x:mzToken.x, y:mzToken.y}];
+  drawMaze();
+}
+
+function drawMaze(){
+  const cfg = MAZES[mazeLevel];
+  mzCtx.clearRect(0,0,mzSize,mzSize);
+  mzCtx.fillStyle = '#FBF7EE';
+  mzCtx.fillRect(0,0,mzSize,mzSize);
+  // pareti sottili
+  mzCtx.fillStyle = '#9DBB8B';
+  for (let y=0;y<maze.H;y++){
+    for (let x=0;x<maze.W;x++){
+      if (maze.g[y][x] === 1){ mzCtx.fillRect(mzOff[x], mzOff[y], mzWid[x]+0.6, mzWid[y]+0.6); }
+    }
+  }
+  // anello di partenza
+  const st = startPx();
+  mzCtx.strokeStyle = 'rgba(120,100,70,.25)'; mzCtx.lineWidth = 2;
+  mzCtx.beginPath(); mzCtx.arc(st.x, st.y, mzCorr*0.4, 0, Math.PI*2); mzCtx.stroke();
+  // scia
+  if (mzTrail.length > 1){
+    mzCtx.strokeStyle = 'rgba(230,168,150,.45)';
+    mzCtx.lineWidth = mzTokenR*0.9; mzCtx.lineCap = 'round'; mzCtx.lineJoin = 'round';
+    mzCtx.beginPath(); mzCtx.moveTo(mzTrail[0].x, mzTrail[0].y);
+    for (let i=1;i<mzTrail.length;i++){ mzCtx.lineTo(mzTrail[i].x, mzTrail[i].y); }
+    mzCtx.stroke();
+  }
+  // meta
+  const gl = goalPx();
+  mzCtx.font = (mzCorr*1.05) + 'px sans-serif';
+  mzCtx.textAlign = 'center'; mzCtx.textBaseline = 'middle';
+  mzCtx.fillText(cfg.goal, gl.x, gl.y);
+  // cerchio "riparti da qui" quando il dito è staccato
+  if (!mzDragging && !mzWon){
+    mzCtx.strokeStyle = 'rgba(218,148,128,.6)'; mzCtx.lineWidth = 2.5;
+    mzCtx.setLineDash([6,5]);
+    mzCtx.beginPath(); mzCtx.arc(mzToken.x, mzToken.y, mzGrabR, 0, Math.PI*2); mzCtx.stroke();
+    mzCtx.setLineDash([]);
+  }
+  // personaggio (disco + emoji)
+  mzCtx.fillStyle = '#FFFDF8';
+  mzCtx.beginPath(); mzCtx.arc(mzToken.x, mzToken.y, mzTokenR*1.15, 0, Math.PI*2); mzCtx.fill();
+  mzCtx.font = (mzTokenR*1.9) + 'px sans-serif';
+  mzCtx.fillText(cfg.char, mzToken.x, mzToken.y);
+}
+
+/* il cerchio del personaggio non deve sovrapporsi alle pareti */
+function mzCanMove(nx, ny){
+  const r = mzTokenR;
+  if (nx-r<0 || ny-r<0 || nx+r>mzSize || ny+r>mzSize) return false;
+  const cx0 = bandAt(nx-r), cx1 = bandAt(nx+r);
+  const ry0 = bandAt(ny-r), ry1 = bandAt(ny+r);
+  for (let ry=ry0; ry<=ry1; ry++){
+    for (let cx=cx0; cx<=cx1; cx++){
+      if (ry<0||cx<0||ry>=maze.H||cx>=maze.W) continue;
+      if (maze.g[ry][cx] === 1){
+        const rx0 = mzOff[cx], ryy0 = mzOff[ry];
+        const rx1 = rx0 + mzWid[cx], ryy1 = ryy0 + mzWid[ry];
+        const nX = Math.max(rx0, Math.min(nx, rx1));
+        const nY = Math.max(ryy0, Math.min(ny, ryy1));
+        const dx = nx-nX, dy = ny-nY;
+        if (dx*dx + dy*dy < r*r) return false;
+      }
+    }
+  }
+  return true;
+}
+function mzMoveToward(t){
+  const step = Math.max(1, mzTokenR*0.5);
+  let guard = 0;
+  while (guard < 300){
+    guard++;
+    const dx = t.x-mzToken.x, dy = t.y-mzToken.y;
+    const d = Math.hypot(dx, dy);
+    if (d < 0.5) break;
+    const sx = dx/d*Math.min(step,d), sy = dy/d*Math.min(step,d);
+    const bx = mzToken.x, by = mzToken.y;
+    if (mzCanMove(mzToken.x+sx, mzToken.y)) mzToken.x += sx;   // scivola lungo la parete
+    if (mzCanMove(mzToken.x, mzToken.y+sy)) mzToken.y += sy;
+    if (mzToken.x === bx && mzToken.y === by) break;           // bloccato: non attraversa
+    const last = mzTrail[mzTrail.length-1];
+    if (!last || Math.hypot(mzToken.x-last.x, mzToken.y-last.y) > mzCorr*0.15){
+      mzTrail.push({x:mzToken.x, y:mzToken.y});
+    }
+  }
+}
+function mzCheckWin(){
+  const gl = goalPx();
+  if (Math.hypot(mzToken.x-gl.x, mzToken.y-gl.y) < mzTokenR + mzCorr*0.35){
+    mzWon = true; mzDragging = false;
+    playWin(); confetti();
+    mazeWin();
+  }
+}
+function mzTick(){
+  mzRaf = null;
+  if (mzDragging){ mzMoveToward(mzTarget); if (!mzWon) mzCheckWin(); }
+  drawMaze();
+  if (mzDragging && !mzWon){ mzRaf = requestAnimationFrame(mzTick); }
+}
+function mzEnsureLoop(){ if (mzRaf === null) mzRaf = requestAnimationFrame(mzTick); }
+
+function mzPos(e){
+  const rect = mzCanvas.getBoundingClientRect();
+  return { x:e.clientX-rect.left, y:e.clientY-rect.top };
+}
+function mzDown(e){
+  if (mzWon) return;
+  const p = mzPos(e);
+  // si può afferrare solo vicino al personaggio (cerchio di tolleranza)
+  if (Math.hypot(p.x-mzToken.x, p.y-mzToken.y) <= mzTokenR + mzGrabR){
+    mzDragging = true; mzTarget.x = p.x; mzTarget.y = p.y;
+    playPick();
+    try { mzCanvas.setPointerCapture(e.pointerId); } catch(_){}
+    mzEnsureLoop();
+  }
+  e.preventDefault();
+}
+function mzMove(e){
+  if (!mzDragging) return;
+  const p = mzPos(e); mzTarget.x = p.x; mzTarget.y = p.y;
+  e.preventDefault();
+}
+function mzUp(e){
+  if (mzDragging){
+    mzDragging = false;                    // il personaggio resta dov'è
+    try { mzCanvas.releasePointerCapture(e.pointerId); } catch(_){}
+    mzEnsureLoop();                         // ridisegna col cerchio "riparti da qui"
+  }
+}
+function mzResize(){
+  const m = document.getElementById('maze');
+  if (!m || m.style.display === 'none' || !maze) return;
+  layoutMaze(false);
+  drawMaze();
+}
+
+function mazeWin(){
+  const isLast = mazeLevel >= MAZES.length-1;
+  document.getElementById('winStar').textContent = isLast ? '🏆' : '🎉';
+  document.getElementById('winNext').onclick = isLast ? restartMazeGame : nextMazeLevel;
+  document.getElementById('winBack').onclick = goToMenu;
+  document.getElementById('win').style.display = 'flex';
+}
+function nextMazeLevel(){   mazeLevel++;    document.getElementById('win').style.display = 'none'; initMazeLevel(); }
+function restartMazeGame(){ mazeLevel = 0;  document.getElementById('win').style.display = 'none'; initMazeLevel(); }
+
+/* Fisher-Yates */
+function shuffle(arr){
+  for (let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ---------- Coriandoli (delicati) ---------- */
+function confetti(){
+  const pieces = ['🎉','⭐','🌟','🎈','✨','🍃'];
+  for (let i=0;i<26;i++){
+    const s = document.createElement('span');
+    s.className = 'confetti';
+    s.textContent = pieces[Math.floor(Math.random()*pieces.length)];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.fontSize = (16 + Math.random()*18) + 'px';
+    s.style.animationDuration = (2.6 + Math.random()*1.8) + 's';
+    s.style.animationDelay = (Math.random()*0.6) + 's';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 5200);
+  }
+}
+
+/* ---------- Suoni dolci (Web Audio) ---------- */
+let audioCtx = null;
+let soundOn  = true;
+
+function initAudio(){
+  if (!audioCtx){
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function tone(freq, dur, vol, delay){
+  if (!soundOn || !audioCtx) return;
+  const t0 = audioCtx.currentTime + (delay||0);
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function playFlip(){    tone(520, 0.10, 0.05, 0); }
+function playMatch(){   tone(587, 0.14, 0.07, 0); tone(784, 0.18, 0.06, 0.10); }
+function playNoMatch(){ tone(300, 0.14, 0.04, 0); }
+function playWin(){     [523,659,784,1047].forEach((f,i)=> tone(f, 0.24, 0.07, i*0.13)); }
+function playStamp(){   tone(500, 0.03, 0.035, 0); tone(180, 0.11, 0.06, 0.005); }   // "pop" del timbro
+function playErase(){   tone(640, 0.05, 0.03, 0); }                                  // fruscio della gomma
+function playPick(){    tone(680, 0.06, 0.045, 0); }                                 // tocco/selezione
+function playPop(f){    tone(f, 0.09, 0.055, 0); tone(f*1.6, 0.05, 0.03, 0.02); }     // bolla che scoppia
+function playFirework(){                                                              // fuoco d'artificio
+  tone(150, 0.14, 0.05, 0);
+  for (let i=0;i<4;i++) tone(700 + Math.random()*700, 0.10, 0.022, 0.05 + i*0.05);
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('sound').textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn) initAudio();
+}
+</script>
+<script>
+/* ================================================================
+   AREA GENITORI · LINGUA (IT/EN dal dispositivo) · LIMITE DI TEMPO
+   ================================================================ */
+
+/* ---------- Impostazioni persistenti ---------- */
+const GBK = 'gb_settings';
+let gbs;
+try { gbs = JSON.parse(localStorage.getItem(GBK)) || {}; } catch(e){ gbs = {}; }
+if (gbs.lang !== 'it' && gbs.lang !== 'en') gbs.lang = 'auto';
+if (typeof gbs.limit !== 'number') gbs.limit = 0;          // 0 = senza limite
+function gbSave(){ try { localStorage.setItem(GBK, JSON.stringify(gbs)); } catch(e){} }
+
+/* ---------- Contatore minuti del giorno (condiviso con bolidi.html) ---------- */
+function gbToday(){ const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function gbPlayKey(){ return 'gb_play_' + gbToday(); }
+function gbPlayed(){ try { return parseInt(localStorage.getItem(gbPlayKey()),10) || 0; } catch(e){ return 0; } }
+function gbAdd(sec){ try { localStorage.setItem(gbPlayKey(), String(gbPlayed()+sec)); } catch(e){} }
+function gbOver(){ return gbs.limit > 0 && gbPlayed() >= gbs.limit*60; }
+try { // elimina i contatori dei giorni passati
+  for (let i = localStorage.length-1; i >= 0; i--){
+    const k = localStorage.key(i);
+    if (k && k.indexOf('gb_play_') === 0 && k !== gbPlayKey()) localStorage.removeItem(k);
+  }
+} catch(e){}
+
+/* ---------- Lingua ---------- */
+function gbResolveLang(){
+  if (gbs.lang === 'it' || gbs.lang === 'en') return gbs.lang;
+  return ((navigator.language || 'it').toLowerCase().indexOf('it') === 0) ? 'it' : 'en';
+}
+
+/* Dizionario testi fissi: italiano → inglese (il markup resta italiano) */
+const M_EN = {
+  'Scegli il gioco':'Pick a game',
+  'Nove giochi per divertirsi e imparare':'Nine games for fun and learning',
+  'Tocca!':'Tap!', 'Abbinamenti':'Matching', 'Labirinto':'Maze',
+  'Stampini':'Stamps', 'Ricalca':'Trace', 'Conta':'Count',
+  'Bolidi':'Racing', 'Sequenza':'Pattern', 'presto':'soon',
+  '1/3 anni':'1–3 yrs', '3/6 anni':'3–6 yrs', '5+ anni':'5+ yrs',
+  '3+ anni':'3+ yrs', '4+ anni':'4+ yrs',
+  'Genitori':'Parents',
+  '← Giochi':'← Games', '← Indietro':'← Back', 'tieni premuto':'press & hold',
+  'Memory a Livelli':'Memory Levels',
+  '3 anni':'age 3', '6 anni':'age 6',
+  '6 carte · più facile':'6 cards · easier',
+  '12 carte · più impegnativo':'12 cards · harder',
+  'Coppie:':'Pairs:', 'Mostra le carte':'Show the cards',
+  'Livello 1 di 3 · Animali 🐾':'Level 1 of 3 · Animals 🐾',
+  'Livello 1 di 3':'Level 1 of 3', 'Livello 1 di 6':'Level 1 of 6',
+  "Porta l'astronauta sulla Luna":'Take the astronaut to the Moon',
+  'Tieni il dito premuto sul personaggio e guidalo fino alla meta. Le pareti non si attraversano. Se stacchi il dito, riparti da dove eri.':
+    'Keep your finger on the character and guide it to the goal. Walls cannot be crossed. If you lift your finger, you continue from where you were.',
+  "Collega ogni figura di sinistra con quella giusta a destra: trascina il dito da una all'altra, oppure tocca prima una e poi l'altra.":
+    'Connect each picture on the left with the matching one on the right: drag your finger from one to the other, or tap one and then the other.',
+  'Abbinati:':'Matched:',
+  'Bolle 🎈':'Bubbles 🎈',
+  'Tocca lo schermo: succede sempre qualcosa. Premi il nome in alto per cambiare gioco.':
+    'Tap the screen: something always happens. Press the name at the top to change game.',
+  'Conta 🔢':'Count 🔢',
+  'Quanti sono? Tocca il numero giusto. Puoi toccare gli oggetti uno per uno per contarli.':
+    'How many are there? Tap the right number. You can tap the objects one by one to count them.',
+  'Segui la linea con il dito':'Follow the line with your finger',
+  'forme e linee':'shapes and lines', 'lettere stampatello':'block letters',
+  'La pioggia 🌧️':'The rain 🌧️',
+  "Segui la linea con il dito, partendo dal pallino verde. Quando la figura è finita, un'altra arriva da sola.":
+    'Follow the line with your finger, starting from the green dot. When the shape is done, another one comes along.'
+};
+const M_IT = {}; for (const k in M_EN) M_IT[M_EN[k]] = k;
+
+/* Nomi e titoli mostrati dai giochi (temi, labirinti, abbinamenti, figure, bolle) */
+const TRN_EN = {
+  'Animali':'Animals', 'Mezzi di trasporto':'Vehicles', 'Frutta':'Fruit',
+  'Mare':'Sea', 'Giardino':'Garden', 'Dolci':'Sweets', 'Sport':'Sports', 'Cielo':'Sky',
+  "Porta l'astronauta sulla Luna 🚀 → 🌙":'Take the astronaut to the Moon 🚀 → 🌙',
+  'Porta il coniglio alla carota 🐰 → 🥕':'Take the bunny to the carrot 🐰 → 🥕',
+  "Porta l'ape al fiore 🐝 → 🌻":'Take the bee to the flower 🐝 → 🌻',
+  'Porta lo scoiattolo alla nocciola 🐿️ → 🌰':'Take the squirrel to the nut 🐿️ → 🌰',
+  "Porta l'orsetto al miele 🐻 → 🍯":'Take the little bear to the honey 🐻 → 🍯',
+  'Porta il pinguino al pesce 🐧 → 🐟':'Take the penguin to the fish 🐧 → 🐟',
+  'Porta il topolino al formaggio 🐭 → 🧀':'Take the little mouse to the cheese 🐭 → 🧀',
+  'Porta i pompieri al fuoco 🚒 → 🔥':'Take the firefighters to the fire 🚒 → 🔥',
+  'Unisci i colori uguali':'Match the same colors',
+  'Unisci ogni cosa al suo colore':'Match each thing to its color',
+  'Unisci ogni cosa alla sua forma':'Match each thing to its shape',
+  'Unisci le cose che stanno insieme':'Match the things that go together',
+  'Unisci ogni mezzo a dove va':'Match each vehicle to where it goes',
+  'Unisci ogni animale a ciò che dà':'Match each animal to what it gives',
+  'Unisci ogni cosa al momento giusto':'Match each thing to the right moment',
+  'Unisci i contrari':'Match the opposites',
+  'Unisci ogni cosa a da dove viene':'Match each thing to where it comes from',
+  'Unisci ciò che viene dopo':'Match what comes next',
+  'La pioggia':'The rain', 'Il treno':'The train', 'Il sole':'The sun',
+  'La croce':'The cross', 'La casa':'The house', 'La discesa':'The slope',
+  'La ics':'The X', 'La montagna':'The mountain', 'Il fulmine':'The lightning',
+  'Il mare':'The sea', 'La lumaca':'The snail', 'La scala':'The ladder',
+  'Bolle 🎈':'Bubbles 🎈', 'Fuochi 🎆':'Fireworks 🎆', 'Musica 🎵':'Music 🎵'
+};
+
+/* Testi usati dal codice dei giochi e dall'area genitori */
+const GB_T = {
+  memorize:   { it:'Memorizza! ', en:'Memorize! ' },
+  hintFigure: { it:"Segui la linea con il dito, partendo dal pallino verde. Quando la figura è finita, un'altra arriva da sola.",
+                en:'Follow the line with your finger, starting from the green dot. When the shape is done, another one comes along.' },
+  hintLetters:{ it:'Segui la linea con il dito. Premi la lettera qui sopra per scrivere parole intere.',
+                en:'Follow the line with your finger. Press the letter above to write whole words.' },
+  hintWords:  { it:'Scrivi la parola una lettera alla volta. Premi la parola qui sopra per tornare alle lettere singole.',
+                en:'Write the word one letter at a time. Press the word above to go back to single letters.' },
+  parTitle:   { it:'Area genitori', en:'Parents area' },
+  parGate:    { it:'Domanda per i grandi: quanto fa', en:'A question for grown-ups: what is' },
+  langLab:    { it:'Lingua', en:'Language' },
+  langAuto:   { it:'Auto (dispositivo)', en:'Auto (device)' },
+  limitLab:   { it:'Tempo di gioco al giorno', en:'Daily play time' },
+  noLimit:    { it:'Senza limite', en:'No limit' },
+  today:      { it:'Oggi: {m} min giocati', en:'Today: {m} min played' },
+  resetToday: { it:'Azzera il contatore di oggi', en:"Reset today's counter" },
+  close:      { it:'Chiudi', en:'Close' },
+  tuTitle:    { it:'Il tempo di gioco è finito!', en:'Playtime is over!' },
+  tuMsg:      { it:'Per oggi basta così. A domani! 👋', en:"That's enough for today. See you tomorrow! 👋" },
+  tuParents:  { it:'🔒 Genitori', en:'🔒 Parents' }
+};
+
+const GB = {
+  lang: gbResolveLang,
+  t: function(k){ const e = GB_T[k]; return e ? e[gbResolveLang()] : k; },
+  trn: function(s){ return (gbResolveLang()==='en' && TRN_EN[s]) ? TRN_EN[s] : s; },
+  lvl: function(n, tot){ return (gbResolveLang()==='en' ? 'Level ' : 'Livello ') + n +
+                                (gbResolveLang()==='en' ? ' of ' : ' di ') + tot; }
+};
+
+/* Applica la lingua ai testi fissi della pagina (markup sorgente: italiano) */
+let gbShown = 'it';
+function applyLang(){
+  const target = gbResolveLang();
+  document.documentElement.lang = target;
+  TRACE_PAROLE = (target === 'en') ? TRACE_PAROLE_EN : TRACE_PAROLE_IT;
+  trParolaIdx = 0; trLetteraIdx = 0;
+  if (target !== gbShown){
+    const map = (target === 'en') ? M_EN : M_IT;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    let n;
+    while ((n = walker.nextNode())){
+      const p = n.parentNode;
+      if (p && (p.tagName === 'SCRIPT' || p.tagName === 'STYLE')) continue;
+      const t = n.nodeValue.trim();
+      if (t && map[t] !== undefined) n.nodeValue = n.nodeValue.replace(t, map[t]);
+    }
+    const ss = document.querySelector('#start .sub');
+    if (ss) ss.innerHTML = (target === 'en')
+      ? 'Choose the age. Each age has 3 levels to beat:<br>animals 🐾, vehicles 🚗 and fruit 🍎'
+      : "Scegli l'età. Per ogni età ci sono 3 livelli da superare:<br>animali 🐾, mezzi di trasporto 🚗 e frutta 🍎";
+    gbShown = target;
+  }
+}
+
+/* ---------- Area genitori: cancelletto + impostazioni ---------- */
+let parA = 0, parB = 0;
+function parOpen(){
+  parA = 3 + Math.floor(Math.random()*7);   // 3..9
+  parB = 3 + Math.floor(Math.random()*7);
+  const ok = parA * parB;
+  const opts = new Set([ok]);
+  while (opts.size < 4){
+    const v = ok + [-12,-9,-6,-4,-3,3,4,6,9,12][Math.floor(Math.random()*10)];
+    if (v > 0) opts.add(v);
+  }
+  const arr = Array.from(opts); shuffle(arr);
+  const card = document.getElementById('parCard');
+  card.innerHTML =
+    '<h2>' + GB.t('parTitle') + '</h2>' +
+    '<div class="par-info">' + GB.t('parGate') + '</div>' +
+    '<div class="par-q">' + parA + ' × ' + parB + ' = ?</div>' +
+    '<div class="par-row">' + arr.map(v =>
+      '<button class="par-opt" onclick="parAnswer(this,' + v + ')">' + v + '</button>').join('') + '</div>' +
+    '<button class="par-close" onclick="parClose()">' + GB.t('close') + '</button>';
+  document.getElementById('parent').style.display = 'flex';
+}
+function parAnswer(btn, v){
+  if (v === parA * parB){ parSettings(); }
+  else { btn.classList.add('wrong'); setTimeout(parOpen, 450); }   // sbagliato: nuova domanda
+}
+function parSettings(){
+  const played = Math.round(gbPlayed()/60);
+  const langBtn = (val, lab) =>
+    '<button class="par-opt' + (gbs.lang === val ? ' sel' : '') +
+    '" onclick="parSetLang(\'' + val + '\')">' + lab + '</button>';
+  const limBtn = (val, lab) =>
+    '<button class="par-opt' + (gbs.limit === val ? ' sel' : '') +
+    '" onclick="parSetLimit(' + val + ')">' + lab + '</button>';
+  document.getElementById('parCard').innerHTML =
+    '<h2>' + GB.t('parTitle') + '</h2>' +
+    '<div class="par-lab">' + GB.t('langLab') + '</div>' +
+    '<div class="par-row">' + langBtn('auto', GB.t('langAuto')) + langBtn('it','Italiano') + langBtn('en','English') + '</div>' +
+    '<div class="par-lab">' + GB.t('limitLab') + '</div>' +
+    '<div class="par-row">' + limBtn(0, GB.t('noLimit')) + limBtn(15,'15 min') + limBtn(30,'30 min') +
+                              limBtn(45,'45 min') + limBtn(60,'60 min') + '</div>' +
+    '<div class="par-info">' + GB.t('today').replace('{m}', played) + '</div>' +
+    '<button class="par-reset" onclick="parResetToday()">' + GB.t('resetToday') + '</button><br>' +
+    '<button class="par-close" onclick="parClose()">' + GB.t('close') + '</button>';
+}
+function parSetLang(v){ gbs.lang = v; gbSave(); applyLang(); parSettings(); }
+function parSetLimit(v){ gbs.limit = v; gbSave(); parSettings(); }
+function parResetToday(){ try { localStorage.removeItem(gbPlayKey()); } catch(e){} gbGrace = 0; parSettings(); }
+function parClose(){
+  document.getElementById('parent').style.display = 'none';
+  if (!gbOver()) gbHideBlock();
+}
+
+/* ---------- Limite di tempo: conteggio e blocco "a fine livello" ---------- */
+const GB_SECTIONS = ['game','maze','abb','stamp','bolle','conta','trace'];
+const GB_FREE = { stamp:1, bolle:1, conta:1, trace:1 };   // giochi senza fine livello
+let gbGrace = 0;                                          // inizio del periodo di tolleranza
+
+function gbActiveSection(){
+  for (const id of GB_SECTIONS){
+    const el = document.getElementById(id);
+    if (el && el.style.display === 'block') return id;
+  }
+  return null;
+}
+function gbShowBlock(){
+  const c = document.getElementById('timeupCard');
+  c.innerHTML =
+    '<div class="big-moon">🌙</div>' +
+    '<h2>' + GB.t('tuTitle') + '</h2>' +
+    '<p>' + GB.t('tuMsg') + '</p>' +
+    '<button class="tiny" onclick="parOpen()">' + GB.t('tuParents') + '</button>';
+  document.getElementById('timeup').style.display = 'flex';
+}
+function gbHideBlock(){ document.getElementById('timeup').style.display = 'none'; }
+
+setInterval(function(){
+  const sec = gbActiveSection();
+  if (sec && document.visibilityState === 'visible') gbAdd(1);
+  if (!gbOver()){ gbGrace = 0; return; }
+  if (document.getElementById('timeup').style.display === 'flex') return;
+  if (!sec){ gbShowBlock(); return; }               // al menu o alle schermate di scelta
+  if (GB_FREE[sec]){                                 // gioco libero: 60 s di tolleranza
+    if (!gbGrace) gbGrace = Date.now();
+    if (Date.now() - gbGrace > 60000) gbShowBlock();
+  }                                                  // giochi a livelli: si attende la vittoria
+}, 1000);
+
+/* A fine livello (overlay di vittoria) il blocco arriva dopo la festa */
+new MutationObserver(function(){
+  const w = document.getElementById('win');
+  if (w.style.display === 'flex' && gbOver()) setTimeout(function(){
+    if (gbOver()) gbShowBlock();
+  }, 1800);
+}).observe(document.getElementById('win'), { attributes:true, attributeFilter:['style'] });
+
+/* Con il tempo esaurito i giochi non si aprono */
+['openMemory','openLabirinto','openAbbinamenti','openStampini','openBolle','openConta','openRicalca']
+.forEach(function(fn){
+  const orig = window[fn];
+  window[fn] = function(){ if (gbOver()){ gbShowBlock(); return; } return orig.apply(this, arguments); };
+});
+function openBolidi(){ if (gbOver()){ gbShowBlock(); return; } location.href = 'bolidi.html'; }
+
+/* Avvio */
+applyLang();
+if (gbOver()) gbShowBlock();
+</script>
+<script>
+/* Registrazione Service Worker: abilita l'uso offline e l'installazione.
+   Attiva solo su https o localhost (requisito dei browser); aperta come
+   file:// l'app funziona comunque, semplicemente senza installazione. */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('Service worker non registrato:', err);
+    });
+  });
+}
+/* Questi giochi sono pensati in verticale; Bolidi (pagina separata) in orizzontale.
+   Il blocco funziona solo in modalità app installata/fullscreen: altrove fallisce
+   in silenzio e non cambia nulla. */
+if (screen.orientation && screen.orientation.lock) {
+  screen.orientation.lock('portrait').catch(() => {});
+}
+try { if (window.AppNative && AppNative.setOrientation) AppNative.setOrientation('portrait'); } catch(e){}
+</script>
+</body>
+</html>

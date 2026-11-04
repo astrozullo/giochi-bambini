@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+node_modules/
+wrapper/assets/
+wrapper/gen/
+wrapper/obj/
+wrapper/*.keystore
+wrapper/*.apk
+wrapper/classes.dex
